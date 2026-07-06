@@ -3,14 +3,14 @@
   "id": "omwh",
   "version": "${version}",
   "name": "OMWH (Java)",
-  "description": "Adds /home and /spawn commands with configurable cooldowns, aliases, and messages. Works singleplayer or server-side only.",
+  "description": "Adds /home and /spawn teleport commands that stay within the player's current dimension, with configurable cooldowns, messages, aliases, and mount/passenger support.",
   "authors": [
     "PyreHaven"
   ],
   "contact": {
     "homepage": "https://pyrehaven.xyz",
-    "sources": "https://github.com/phred2026-cyber/omwh",
-    "issues": "https://github.com/phred2026-cyber/omwh/issues"
+    "sources": "https://github.com/ff-tech-xyz/omwh",
+    "issues": "https://github.com/ff-tech-xyz/omwh/issues"
   },
   "icon": "assets/omwh/icon.png",
   "environment": "*",
