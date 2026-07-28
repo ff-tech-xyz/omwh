@@ -79,19 +79,23 @@ logger.info("[SpawnCommand] /spawn invoked by {} in {} (coords omitted)", invoke
        int height = 2;
        net.minecraft.world.entity.Entity root = player.getRootVehicle();
        if (root != player) {
-            width = (int) Math.ceil(root.getBbWidth());
-             height = (int) Math.max(2, Math.ceil(root.getBbHeight()));
+            width = (int) Math.max(1, Math.ceil(root.getBbWidth()));
+            height = (int) Math.max(3, Math.ceil(root.getBbHeight()) + 2);
 }
 
-       // Random search in 4 chunks (64 blocks) radius. Favors Grass/Sky. Requires height + 1 for headroom (spawn 1 block up).
-       net.minecraft.core.BlockPos candidateFeet = SafeTeleportUtils.findRandomSafeLocation(targetLevel, spawnCenter, 64, width, height + 1, true);
+       // One bounded, deterministic nearest-first search. spawnCenter and result are feet coordinates.
+       var selection = SafeTeleportUtils.findSafeSelectionForSize(targetLevel, spawnCenter, 64, width, height);
+       net.minecraft.core.BlockPos candidateFeet = selection.feet() == null
+               ? null : SafeTeleportUtils.toBlockPos(selection.feet());
 
        if (candidateFeet == null) {
-            // Fallback
-            candidateFeet = SafeTeleportUtils.findSafeLocationForSize(targetLevel, spawnCenter, 64, width, height + 1, true);
-       }
-
-       if (candidateFeet == null) {
+            if (root != player) {
+                var playerOnly = SafeTeleportUtils.findSafeSelectionForSize(targetLevel, spawnCenter, 64, 1, 2);
+                if (playerOnly.feet() != null) {
+                    OMWH.MESSAGE_UTILS.sendMessage(player, "§cYour vehicle is too big to fit safely near spawn. Please dismount and try again.");
+                    return false;
+                }
+            }
             OMWH.MESSAGE_UTILS.sendMessage(player, cfg.unsafeSpawnMessage);
             return false;
        }

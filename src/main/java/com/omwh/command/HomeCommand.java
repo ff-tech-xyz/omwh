@@ -82,8 +82,6 @@ public class HomeCommand {
            return false;
        }
 
-       OMWH.EFFECTS_MANAGER.playTeleportEffects(player);
-
        BlockPos bedTop = spawnPos.above();
        int widthBlocks = 1;
        int heightBlocks = 2;
@@ -91,16 +89,18 @@ public class HomeCommand {
        boolean isRiding = root != player;
        if (isRiding) {
             widthBlocks = (int) Math.max(1, Math.ceil(root.getBbWidth()));
-            heightBlocks = (int) Math.max(2, Math.ceil(root.getBbHeight()));
+            heightBlocks = (int) Math.max(3, Math.ceil(root.getBbHeight()) + 2);
        }
 
-       // Search for safe spot within 5 blocks. Height + 1 for headroom (spawn 1 block up).
-       BlockPos safePos = SafeTeleportUtils.findSafeLocationForSize(spawnLevel, bedTop, 5, widthBlocks, heightBlocks + 1, false);
+       // bedTop and every result are feet coordinates; the checked height is the actual required headroom.
+       var selection = SafeTeleportUtils.findSafeSelectionForSize(
+               spawnLevel, bedTop, 5, widthBlocks, heightBlocks);
+       BlockPos safePos = selection.feet() == null ? null : SafeTeleportUtils.toBlockPos(selection.feet());
 
        if (safePos == null) {
              if (isRiding) {
                   // Check if player alone could fit
-                  BlockPos fitPlayer = SafeTeleportUtils.findSafeLocationForSize(spawnLevel, bedTop, 5, 1, 3, false);
+                  BlockPos fitPlayer = SafeTeleportUtils.findSafeLocationForSize(spawnLevel, bedTop, 5, 1, 2, false);
                   if (fitPlayer != null) {
                        OMWH.MESSAGE_UTILS.sendMessage(player, "§cYour vehicle is too big. Please dismount and try again.");
                        return false;
@@ -110,6 +110,7 @@ public class HomeCommand {
              return false;
        }
 
+       OMWH.EFFECTS_MANAGER.playTeleportEffects(player);
        TeleportVehicles.Result result = TeleportVehicles.teleportWithMount(player, spawnLevel, safePos);
        boolean teleportSuccessful = result.success;
        java.util.List<ServerPlayer> passengerPlayers = result.passengerPlayers;

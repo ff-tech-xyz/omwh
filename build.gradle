@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.14-SNAPSHOT'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -12,16 +12,26 @@ base {
 
 repositories {
 	mavenCentral()
-	maven {
-		name = 'Sponge'
-		url = 'https://repo.spongepowered.org/repository/maven-public/'
-	}
 }
 
-loom {
-	mixin {
-		defaultRefmapName.set("omwh.refmap.json")
+def localMinecraftMetadataServer = {
+	def metadataDir = file("gradle/minecraft")
+	def server = com.sun.net.httpserver.HttpServer.create(new java.net.InetSocketAddress("127.0.0.1", 0), 0)
+	server.createContext("/26.2-custom.json") { exchange ->
+		byte[] body = new File(metadataDir, "26.2-custom.json").bytes
+		exchange.responseHeaders.add("Content-Type", "application/json")
+		exchange.sendResponseHeaders(200, body.length)
+		exchange.responseBody.write(body)
+		exchange.close()
 	}
+	server.start()
+	gradle.buildFinished { server.stop(0) }
+	return "http://127.0.0.1:${server.address.port}/26.2-custom.json"
+}.call()
+
+loom {
+	noIntermediateMappings()
+	customMinecraftMetadata.set(localMinecraftMetadataServer)
 	mods {
 		"omwh" {
 			sourceSet sourceSets.main
@@ -38,6 +48,20 @@ sourceSets {
 			srcDirs = ['src/main/resources']
 		}
 	}
+}
+
+tasks.register('regressionTest', JavaExec) {
+	group = 'verification'
+	description = 'Runs deterministic OMWH regression tests without a test framework dependency.'
+	dependsOn testClasses
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'com.omwh.utils.RegressionTestSuite'
+}
+
+check.dependsOn regressionTest
+
+tasks.named('test') {
+	failOnNoDiscoveredTests = false
 }
 
 dependencies {
