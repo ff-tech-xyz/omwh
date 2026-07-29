@@ -18,6 +18,7 @@ public final class RegressionTestSuite {
         homeRejectsCrossDimensionVanillaTransition();
         homeRejectsMountedTreeWhenRootCannotFitExactVanillaDestination();
         vehicleClearanceAddsHalfBlockHorizontallyAndTwoAndAHalfAbove();
+        homeBedDoesNotBlockItsOwnVehicleClearance();
         System.out.println("OMWH regression tests passed");
     }
 
@@ -137,6 +138,18 @@ public final class RegressionTestSuite {
         assertEquals(new VehicleClearanceBox.Bounds(9.75, 64.0, -5.25, 12.25, 68.0, -2.75),
                 clearance,
                 "vehicle clearance must use the exact requested horizontal and upper margins");
+    }
+
+    private static void homeBedDoesNotBlockItsOwnVehicleClearance() {
+        VehicleClearanceBox.Bounds required =
+                new VehicleClearanceBox.Bounds(0.25, 64.0, 0.25, 2.75, 68.0, 2.75);
+        VehicleClearanceBox.Bounds overlappingBed =
+                new VehicleClearanceBox.Bounds(0.0, 64.0, 0.0, 1.0, 64.5625, 1.0);
+
+        assertTrue(!VehicleClearanceBox.blocks(required, overlappingBed, true),
+                "the home bed must not reject an otherwise open mounted destination");
+        assertTrue(VehicleClearanceBox.blocks(required, overlappingBed, false),
+                "the same overlapping collision volume must block when it is not the home bed");
     }
 
     private static SafeLocationPlanner.CellProbe probeForFeet(

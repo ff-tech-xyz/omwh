@@ -51,7 +51,8 @@ public class HomeCommand {
            return false;
        }
 
-        boolean hasRespawnConfig = player.getRespawnConfig() != null;
+        var respawnConfig = player.getRespawnConfig();
+        boolean hasRespawnConfig = respawnConfig != null;
         if (!hasRespawnConfig) {
             OMWH.MESSAGE_UTILS.sendMessage(player, cfg.noHomepointMessage);
             return false;
@@ -68,7 +69,8 @@ public class HomeCommand {
         boolean missingRespawnBlock = respawn.missingRespawnBlock();
         boolean sameDimension = currentLevel.dimension().equals(targetLevel.dimension());
         boolean rootFits = !mounted || missingRespawnBlock || !sameDimension
-                || TeleportVehicles.hasExactRoom(root, targetLevel, respawn.position());
+                || TeleportVehicles.hasExactRoom(
+                        root, targetLevel, respawn.position(), respawnConfig.respawnData().pos());
 
         HomeRespawnDecision.Outcome decision = HomeRespawnDecision.decide(
                 hasRespawnConfig, missingRespawnBlock, sameDimension, mounted, rootFits);

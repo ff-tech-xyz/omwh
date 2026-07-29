@@ -19,4 +19,11 @@ public final class VehicleClearanceBox {
                 vehicle.maxY() + UPPER_MARGIN,
                 vehicle.maxZ() + HORIZONTAL_MARGIN);
     }
+
+    public static boolean blocks(Bounds requiredSpace, Bounds obstacle, boolean homeBedPart) {
+        if (homeBedPart) return false;
+        return obstacle.maxX() > requiredSpace.minX() && obstacle.minX() < requiredSpace.maxX()
+                && obstacle.maxY() > requiredSpace.minY() && obstacle.minY() < requiredSpace.maxY()
+                && obstacle.maxZ() > requiredSpace.minZ() && obstacle.minZ() < requiredSpace.maxZ();
+    }
 }

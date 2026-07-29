@@ -5,9 +5,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,8 @@ public final class TeleportVehicles {
         return teleportWithMount(player, targetLevel, targetPosition, root.getYRot(), root.getXRot());
     }
 
-    public static boolean hasExactRoom(Entity root, ServerLevel targetLevel, Vec3 targetPosition) {
+    public static boolean hasExactRoom(Entity root, ServerLevel targetLevel, Vec3 targetPosition,
+                                       BlockPos homeBlock) {
         int blockX = net.minecraft.util.Mth.floor(targetPosition.x);
         int blockZ = net.minecraft.util.Mth.floor(targetPosition.z);
         targetLevel.getChunk(blockX >> 4, blockZ >> 4);
@@ -63,8 +66,31 @@ public final class TeleportVehicles {
         AABB requiredSpace = new AABB(
                 clearance.minX(), clearance.minY(), clearance.minZ(),
                 clearance.maxX(), clearance.maxY(), clearance.maxZ());
-        return targetLevel.noBlockCollision(root, requiredSpace)
-                && targetLevel.noBorderCollision(root, requiredSpace);
+        CollisionContext collisionContext = CollisionContext.of(root);
+        for (BlockPos blockPos : BlockPos.betweenClosed(requiredSpace)) {
+            var state = targetLevel.getBlockState(blockPos);
+            boolean homeBedPart = isHomeBedPart(targetLevel, blockPos, homeBlock);
+            for (AABB localBounds : state.getCollisionShape(targetLevel, blockPos, collisionContext).toAabbs()) {
+                AABB obstacle = localBounds.move(blockPos);
+                if (VehicleClearanceBox.blocks(clearance,
+                        new VehicleClearanceBox.Bounds(
+                                obstacle.minX, obstacle.minY, obstacle.minZ,
+                                obstacle.maxX, obstacle.maxY, obstacle.maxZ),
+                        homeBedPart)) {
+                    return false;
+                }
+            }
+        }
+        return targetLevel.noBorderCollision(root, requiredSpace);
+    }
+
+    private static boolean isHomeBedPart(ServerLevel level, BlockPos candidate, BlockPos homeBlock) {
+        var homeState = level.getBlockState(homeBlock);
+        if (!(homeState.getBlock() instanceof BedBlock)) return false;
+        if (candidate.equals(homeBlock)) return true;
+        BlockPos otherPart = homeBlock.relative(BedBlock.getConnectedDirection(homeState));
+        return candidate.equals(otherPart)
+                && level.getBlockState(otherPart).getBlock() instanceof BedBlock;
     }
 
     public static Result teleportWithMount(ServerPlayer player, ServerLevel targetLevel,
