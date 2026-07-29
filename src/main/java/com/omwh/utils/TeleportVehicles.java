@@ -40,6 +40,30 @@ public final class TeleportVehicles {
 
     public static Result teleportWithMount(ServerPlayer player, ServerLevel targetLevel, BlockPos targetFeet) {
         Entity root = player.getRootVehicle();
+        int widthBlocks = (int) Math.max(1, Math.ceil(root.getBbWidth()));
+        SafeLocationPlanner.Footprint footprint = SafeLocationPlanner.Footprint.centered(widthBlocks);
+        Vec3 targetPosition = new Vec3(
+                targetFeet.getX() + footprint.centerOffset(),
+                targetFeet.getY(),
+                targetFeet.getZ() + footprint.centerOffset());
+        return teleportWithMount(player, targetLevel, targetPosition, root.getYRot(), root.getXRot());
+    }
+
+    public static boolean hasExactRoom(Entity root, ServerLevel targetLevel, Vec3 targetPosition) {
+        int blockX = net.minecraft.util.Mth.floor(targetPosition.x);
+        int blockZ = net.minecraft.util.Mth.floor(targetPosition.z);
+        targetLevel.getChunk(blockX >> 4, blockZ >> 4);
+        Vec3 offset = targetPosition.subtract(root.position());
+        return root.getSelfAndPassengers().allMatch(entity -> {
+            var destinationBounds = entity.getBoundingBox().move(offset);
+            return targetLevel.noBlockCollision(entity, destinationBounds)
+                    && targetLevel.noBorderCollision(entity, destinationBounds);
+        });
+    }
+
+    public static Result teleportWithMount(ServerPlayer player, ServerLevel targetLevel,
+                                           Vec3 targetPosition, float yRot, float xRot) {
+        Entity root = player.getRootVehicle();
         ServerLevel rootLevel = WorldCompat.getLevel(root);
         if (rootLevel == null || !rootLevel.dimension().equals(targetLevel.dimension())) {
             player.sendSystemMessage(Component.literal(CROSS_DIMENSION_BLOCKED_MESSAGE), false);
@@ -47,23 +71,20 @@ public final class TeleportVehicles {
         }
 
         MountGraph graph = flatten(root, player);
-        int widthBlocks = (int) Math.max(1, Math.ceil(root.getBbWidth()));
-        SafeLocationPlanner.Footprint footprint = SafeLocationPlanner.Footprint.centered(widthBlocks);
-        double x = targetFeet.getX() + footprint.centerOffset();
-        double y = targetFeet.getY();
-        double z = targetFeet.getZ() + footprint.centerOffset();
 
         // Load the destination before changing entity state. Minecraft 26.2 recursively teleports
         // the attached passenger tree when the root receives one same-dimension transition.
-        targetLevel.getChunk(targetFeet.getX() >> 4, targetFeet.getZ() >> 4);
+        int blockX = net.minecraft.util.Mth.floor(targetPosition.x);
+        int blockZ = net.minecraft.util.Mth.floor(targetPosition.z);
+        targetLevel.getChunk(blockX >> 4, blockZ >> 4);
         Entity moved;
         try {
             moved = root.teleport(new TeleportTransition(
                     targetLevel,
-                    new Vec3(x, y, z),
+                    targetPosition,
                     Vec3.ZERO,
-                    root.getYRot(),
-                    root.getXRot(),
+                    yRot,
+                    xRot,
                     TeleportTransition.DO_NOTHING));
         } catch (RuntimeException exception) {
             LOGGER.error("Mounted teleport failed before Minecraft completed the attached tree transition", exception);

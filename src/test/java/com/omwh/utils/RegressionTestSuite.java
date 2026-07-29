@@ -13,6 +13,10 @@ public final class RegressionTestSuite {
         footprintIsCenteredForOddAndEvenWidths();
         safeSelectionUsesFeetFullSupportHeadroomAndNearestBoundedCandidate();
         safeSelectionReportsExactNearbyAndBlockedOutcomes();
+        homeRejectsAbsentRespawnConfiguration();
+        homeRejectsVanillaMissingRespawnBlockTransition();
+        homeRejectsCrossDimensionVanillaTransition();
+        homeRejectsMountedTreeWhenRootCannotFitExactVanillaDestination();
         System.out.println("OMWH regression tests passed");
     }
 
@@ -96,6 +100,33 @@ public final class RegressionTestSuite {
                 target, 2, -1, 1, one, 2, probeForFeet(Set.of(), one, 2));
         assertEquals(SafeLocationPlanner.Outcome.BLOCKED, blocked.outcome(), "blocked search outcome");
         assertEquals(null, blocked.feet(), "blocked search must not invent a fallback");
+    }
+
+    private static void homeRejectsAbsentRespawnConfiguration() {
+        assertEquals(HomeRespawnDecision.Outcome.NO_HOME,
+                HomeRespawnDecision.decide(false, false, true, false, true),
+                "a player without a configured bed or anchor must not fall back to world spawn");
+    }
+
+    private static void homeRejectsVanillaMissingRespawnBlockTransition() {
+        assertEquals(HomeRespawnDecision.Outcome.NO_HOME,
+                HomeRespawnDecision.decide(true, true, true, false, true),
+                "a missing respawn block transition must not be used by /home");
+    }
+
+    private static void homeRejectsCrossDimensionVanillaTransition() {
+        assertEquals(HomeRespawnDecision.Outcome.CROSS_DIMENSION,
+                HomeRespawnDecision.decide(true, false, false, false, true),
+                "/home must not follow a vanilla transition into another dimension");
+    }
+
+    private static void homeRejectsMountedTreeWhenRootCannotFitExactVanillaDestination() {
+        assertEquals(HomeRespawnDecision.Outcome.VEHICLE_TOO_BIG,
+                HomeRespawnDecision.decide(true, false, true, true, false),
+                "mounted /home must fail instead of searching away from vanilla's exact destination");
+        assertEquals(HomeRespawnDecision.Outcome.ACCEPT,
+                HomeRespawnDecision.decide(true, false, true, false, false),
+                "an unmounted player uses vanilla's already-validated destination");
     }
 
     private static SafeLocationPlanner.CellProbe probeForFeet(
