@@ -17,6 +17,7 @@ public final class RegressionTestSuite {
         homeRejectsVanillaMissingRespawnBlockTransition();
         homeRejectsCrossDimensionVanillaTransition();
         homeRejectsMountedTreeWhenRootCannotFitExactVanillaDestination();
+        vehicleClearanceAddsHalfBlockHorizontallyAndTwoAndAHalfAbove();
         System.out.println("OMWH regression tests passed");
     }
 
@@ -127,6 +128,15 @@ public final class RegressionTestSuite {
         assertEquals(HomeRespawnDecision.Outcome.ACCEPT,
                 HomeRespawnDecision.decide(true, false, true, false, false),
                 "an unmounted player uses vanilla's already-validated destination");
+    }
+
+    private static void vehicleClearanceAddsHalfBlockHorizontallyAndTwoAndAHalfAbove() {
+        VehicleClearanceBox.Bounds clearance = VehicleClearanceBox.around(
+                new VehicleClearanceBox.Bounds(10.25, 64.0, -4.75, 11.75, 65.5, -3.25));
+
+        assertEquals(new VehicleClearanceBox.Bounds(9.75, 64.0, -5.25, 12.25, 68.0, -2.75),
+                clearance,
+                "vehicle clearance must use the exact requested horizontal and upper margins");
     }
 
     private static SafeLocationPlanner.CellProbe probeForFeet(

@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,11 +55,16 @@ public final class TeleportVehicles {
         int blockZ = net.minecraft.util.Mth.floor(targetPosition.z);
         targetLevel.getChunk(blockX >> 4, blockZ >> 4);
         Vec3 offset = targetPosition.subtract(root.position());
-        return root.getSelfAndPassengers().allMatch(entity -> {
-            var destinationBounds = entity.getBoundingBox().move(offset);
-            return targetLevel.noBlockCollision(entity, destinationBounds)
-                    && targetLevel.noBorderCollision(entity, destinationBounds);
-        });
+        AABB vehicleBounds = root.getBoundingBox().move(offset);
+        VehicleClearanceBox.Bounds clearance = VehicleClearanceBox.around(
+                new VehicleClearanceBox.Bounds(
+                        vehicleBounds.minX, vehicleBounds.minY, vehicleBounds.minZ,
+                        vehicleBounds.maxX, vehicleBounds.maxY, vehicleBounds.maxZ));
+        AABB requiredSpace = new AABB(
+                clearance.minX(), clearance.minY(), clearance.minZ(),
+                clearance.maxX(), clearance.maxY(), clearance.maxZ());
+        return targetLevel.noBlockCollision(root, requiredSpace)
+                && targetLevel.noBorderCollision(root, requiredSpace);
     }
 
     public static Result teleportWithMount(ServerPlayer player, ServerLevel targetLevel,
