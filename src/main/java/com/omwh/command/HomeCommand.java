@@ -5,12 +5,16 @@ import com.mojang.brigadier.context.CommandContext;
 import com.omwh.OMWH;
 import com.omwh.config.ConfigManager;
 import com.omwh.utils.HomeRespawnDecision;
+import com.omwh.utils.MountedHomeFallback;
 import com.omwh.utils.TeleportVehicles;
+import net.minecraft.core.BlockPos;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.Vec3;
 
 public class HomeCommand {
    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -68,9 +72,24 @@ public class HomeCommand {
         boolean mounted = root != player;
         boolean missingRespawnBlock = respawn.missingRespawnBlock();
         boolean sameDimension = currentLevel.dimension().equals(targetLevel.dimension());
-        boolean rootFits = !mounted || missingRespawnBlock || !sameDimension
-                || TeleportVehicles.hasExactRoom(
-                        root, targetLevel, respawn.position(), respawnConfig.respawnData().pos());
+        BlockPos homeBlock = respawnConfig.respawnData().pos();
+        boolean canCheckVehicle = mounted && !missingRespawnBlock && sameDimension;
+        boolean exactFits = !canCheckVehicle
+                || TeleportVehicles.hasExactRoom(root, targetLevel, respawn.position(), homeBlock);
+        boolean homeIsBed = canCheckVehicle
+                && targetLevel.getBlockState(homeBlock).getBlock() instanceof BedBlock;
+        Vec3 fallbackPosition = null;
+        boolean fallbackFits = false;
+        if (!exactFits && homeIsBed && !respawnConfig.forced()) {
+            MountedHomeFallback.Position fallback = MountedHomeFallback.aboveBed(
+                    homeBlock.getX(), homeBlock.getY(), homeBlock.getZ());
+            fallbackPosition = new Vec3(fallback.x(), fallback.y(), fallback.z());
+            fallbackFits = TeleportVehicles.hasExactRoom(
+                    root, targetLevel, fallbackPosition, homeBlock);
+        }
+        MountedHomeFallback.Choice destinationChoice = MountedHomeFallback.choose(
+                mounted, homeIsBed, respawnConfig.forced(), exactFits, fallbackFits);
+        boolean rootFits = destinationChoice != MountedHomeFallback.Choice.DENY;
 
         HomeRespawnDecision.Outcome decision = HomeRespawnDecision.decide(
                 hasRespawnConfig, missingRespawnBlock, sameDimension, mounted, rootFits);
@@ -89,10 +108,12 @@ public class HomeCommand {
         }
 
         OMWH.EFFECTS_MANAGER.playTeleportEffects(player);
+        Vec3 targetPosition = destinationChoice == MountedHomeFallback.Choice.ABOVE_BED
+                ? fallbackPosition : respawn.position();
         float targetYaw = mounted ? root.getYRot() : respawn.yRot();
         float targetPitch = mounted ? root.getXRot() : respawn.xRot();
         TeleportVehicles.Result result = TeleportVehicles.teleportWithMount(
-                player, targetLevel, respawn.position(), targetYaw, targetPitch);
+                player, targetLevel, targetPosition, targetYaw, targetPitch);
        boolean teleportSuccessful = result.success;
        java.util.List<ServerPlayer> passengerPlayers = result.passengerPlayers;
 

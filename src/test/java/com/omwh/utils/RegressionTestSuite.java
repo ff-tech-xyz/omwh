@@ -17,8 +17,9 @@ public final class RegressionTestSuite {
         homeRejectsVanillaMissingRespawnBlockTransition();
         homeRejectsCrossDimensionVanillaTransition();
         homeRejectsMountedTreeWhenRootCannotFitExactVanillaDestination();
-        vehicleClearanceAddsHalfBlockHorizontallyAndTwoAndAHalfAbove();
+        vehicleClearanceAddsHalfBlockHorizontallyAndOneAndAHalfAbove();
         homeBedDoesNotBlockItsOwnVehicleClearance();
+        mountedHomeUsesOnlyTheSingleAboveBedFallbackAfterExactClearanceFails();
         System.out.println("OMWH regression tests passed");
     }
 
@@ -131,11 +132,11 @@ public final class RegressionTestSuite {
                 "an unmounted player uses vanilla's already-validated destination");
     }
 
-    private static void vehicleClearanceAddsHalfBlockHorizontallyAndTwoAndAHalfAbove() {
+    private static void vehicleClearanceAddsHalfBlockHorizontallyAndOneAndAHalfAbove() {
         VehicleClearanceBox.Bounds clearance = VehicleClearanceBox.around(
                 new VehicleClearanceBox.Bounds(10.25, 64.0, -4.75, 11.75, 65.5, -3.25));
 
-        assertEquals(new VehicleClearanceBox.Bounds(9.75, 64.0, -5.25, 12.25, 68.0, -2.75),
+        assertEquals(new VehicleClearanceBox.Bounds(9.75, 64.0, -5.25, 12.25, 67.0, -2.75),
                 clearance,
                 "vehicle clearance must use the exact requested horizontal and upper margins");
     }
@@ -150,6 +151,31 @@ public final class RegressionTestSuite {
                 "the home bed must not reject an otherwise open mounted destination");
         assertTrue(VehicleClearanceBox.blocks(required, overlappingBed, false),
                 "the same overlapping collision volume must block when it is not the home bed");
+    }
+
+    private static void mountedHomeUsesOnlyTheSingleAboveBedFallbackAfterExactClearanceFails() {
+        MountedHomeFallback.Position aboveBed = MountedHomeFallback.aboveBed(12, 64, -7);
+        assertEquals(new MountedHomeFallback.Position(12.5, 65.0, -6.5), aboveBed,
+                "the fallback must be centered exactly one block above the configured bed block");
+
+        assertEquals(MountedHomeFallback.Choice.VANILLA,
+                MountedHomeFallback.choose(true, true, false, true, false),
+                "vanilla's exact adjacent position must win whenever it clears");
+        assertEquals(MountedHomeFallback.Choice.ABOVE_BED,
+                MountedHomeFallback.choose(true, true, false, false, true),
+                "a mounted bed home may use the one above-bed fallback when exact clearance fails");
+        assertEquals(MountedHomeFallback.Choice.DENY,
+                MountedHomeFallback.choose(true, true, false, false, false),
+                "a roof blocking the fallback clearance must deny teleportation");
+        assertEquals(MountedHomeFallback.Choice.DENY,
+                MountedHomeFallback.choose(true, false, false, false, true),
+                "anchors must never use the bed fallback");
+        assertEquals(MountedHomeFallback.Choice.DENY,
+                MountedHomeFallback.choose(true, true, true, false, true),
+                "forced homes must never use the bed fallback even when their block is a bed");
+        assertEquals(MountedHomeFallback.Choice.VANILLA,
+                MountedHomeFallback.choose(false, true, false, false, true),
+                "unmounted players must keep vanilla's exact respawn destination");
     }
 
     private static SafeLocationPlanner.CellProbe probeForFeet(
