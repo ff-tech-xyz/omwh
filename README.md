@@ -1,93 +1,54 @@
-# OMWH — On My Way Home
+# OMWH
 
-OMWH adds two simple teleport commands to Fabric: `/home` for returning to your bed or respawn anchor, and `/spawn` for getting back to the spawn point in the dimension you are already in.
+OMWH adds `/home` and `/spawn` to Fabric servers without turning them into cross-dimension warps.
 
-It is built for servers that want convenient travel without turning `/home` and `/spawn` into free cross-dimension warps. Players can get unstuck, regroup, or head back to a safe point, while server owners keep control over cooldowns, messages, command names, and teleport effects.
+- `/home` returns you to a valid bed or respawn anchor in your current dimension.
+- `/spawn` finds safe ground near the current dimension's spawn.
+- Mounts, vehicles, and their passengers travel with you when there is room.
+- Server owners can configure cooldowns, command names, messages, sounds, and particles.
+- Players do not need to install OMWH on their clients.
 
-Built by [PyreHaven](https://pyrehaven.xyz) and used on the [PyreHaven Minecraft Server](https://pyrehaven.xyz).
+Built by [PyreHaven](https://pyrehaven.xyz).
 
-Questions or bug reports? Join the [PyreHaven Discord](https://discord.gg/tZ6Hx2ETA3) or open an issue on GitHub.
+## Teleport rules
 
----
+`/home` uses Minecraft's normal placement around your respawn point. If you are mounted and the vehicle cannot fit beside an uncovered bed, OMWH may place the group directly above it. Invalid, blocked, or cross-dimension homes are refused.
 
-## What the commands do
-
-### `/home`
-
-Teleports a player to their current respawn point. That means their bed in the Overworld or their respawn anchor in the Nether, as long as the point is valid.
-
-OMWH uses Minecraft's normal placement around the respawn point instead of moving the player upward until it finds room. `/home` stays in the player's current dimension and will not move someone from the Nether back to an Overworld bed.
-
-### `/spawn`
-
-Teleports a player to a nearby safe position at the spawn point for the dimension they are already in:
-
-- Overworld: the world spawn
-- Nether: the Nether spawn point
-- End: the obsidian platform
-
-OMWH requires solid support and enough clear space for the player or vehicle. Like `/home`, `/spawn` does not cross dimensions.
-
-### Mounts and passengers
-
-If a player is riding something when they teleport, OMWH brings the ride with them. Horses, boats, pigs, striders, and similar mounts stay attached. Passengers inside the same vehicle, including other players, come along too.
-
-OMWH checks that the destination can fit the vehicle before moving it. `/spawn` looks for nearby safe ground with enough room for the whole vehicle. At `/home`, Minecraft's normal bed position is used when it fits; a mounted player may instead be placed directly above an uncovered bed when the vehicle cannot fit beside it.
-
----
-
-## Why server owners use it
-
-- Keeps `/home` and `/spawn` useful without making them global warp commands
-- Works server-side only, so players do not need to install anything on their client
-- Lets admins tune cooldowns for normal use, combat, recent damage, and joining the server
-- Supports custom command names, such as `/h` and `/s`
-- Lets you rewrite messages and use the `{time}` placeholder for cooldown warnings
-- Can play a sound and show particles when a teleport finishes
-- Uses safe spawn placement with solid support and enough room for the player or vehicle
-
----
+`/spawn` searches near the spawn point for solid ground with enough clear space for the player or vehicle. In the End, it uses the obsidian platform.
 
 ## Installation
 
 1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 26.2.
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api).
-3. Drop the OMWH jar into your `mods/` folder.
-4. Start the game or server once. OMWH creates `config/omwh.json` automatically.
+3. Put the OMWH jar in the `mods` folder.
+4. Start the server or game once to create `config/omwh.json`.
 
-OMWH works in singleplayer and on dedicated servers. On servers, install it on the server only; clients do not need the mod.
-
----
+OMWH also works in singleplayer.
 
 ## Configuration
 
 Edit `config/omwh.json` after the first launch.
 
-| Field | Default | What it controls |
+| Field | Default | Purpose |
 |---|---:|---|
-| `homeCommand` | `"home"` | Command name for `/home` |
-| `spawnCommand` | `"spawn"` | Command name for `/spawn` |
-| `regularCooldownSeconds` | `30` | Time between normal teleports |
+| `homeCommand` | `"home"` | Name of the home command |
+| `spawnCommand` | `"spawn"` | Name of the spawn command |
+| `regularCooldownSeconds` | `30` | Cooldown between normal teleports |
 | `pvpCooldownSeconds` | `45` | Cooldown after PvP |
-| `damageCooldownSeconds` | `10` | Cooldown after taking non-player damage |
-| `joinCooldownSeconds` | `30` | Cooldown after joining the server |
-| `playTeleportSound` | `true` | Plays the Enderman teleport sound on arrival |
-| `spawnTeleportParticles` | `true` | Shows portal particles on arrival |
-| Message fields | see config | Text shown to players, with Minecraft color codes and `{time}` support |
+| `damageCooldownSeconds` | `10` | Cooldown after other damage |
+| `joinCooldownSeconds` | `30` | Cooldown after joining |
+| `playTeleportSound` | `true` | Play a sound after teleporting |
+| `spawnTeleportParticles` | `true` | Show particles after teleporting |
+| Message fields | See config | Text shown to players; supports Minecraft color codes and `{time}` |
 
-Set any cooldown to `0` to disable that cooldown.
-
----
+Set a cooldown to `0` to disable it.
 
 ## Links
 
-- [PyreHaven Discord](https://discord.gg/tZ6Hx2ETA3)
-- [PyreHaven Website](https://pyrehaven.xyz)
-- [Source code](https://github.com/ff-tech-xyz/omwh)
+- [Download on Modrinth](https://modrinth.com/mod/omwh)
 - [Issues and suggestions](https://github.com/ff-tech-xyz/omwh/issues)
-
----
+- [PyreHaven Discord](https://discord.gg/tZ6Hx2ETA3)
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](LICENSE)
