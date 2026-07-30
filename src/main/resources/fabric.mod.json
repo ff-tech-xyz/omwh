@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "omwh",
   "version": "${version}",
-  "name": "OMWH (Java)",
-  "description": "Adds /home and /spawn teleport commands that stay within the player's current dimension, with configurable cooldowns, messages, aliases, and mount/passenger support.",
+  "name": "OMWH",
+  "description": "Adds same-dimension /home and /spawn commands with configurable cooldowns, messages, aliases, effects, and mounted teleport support.",
   "authors": [
     "PyreHaven"
   ],
