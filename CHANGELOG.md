@@ -1,10 +1,9 @@
 # Changelog
 
 ## 1.1.3
-- Mounted `/home` and `/spawn` teleports keep vehicles and passengers attached instead of leaving the client visually dismounted.
-- `/home` now uses Minecraft's normal bed and respawn-anchor placement without consuming an anchor charge.
-- Vehicle teleports check the vehicle's actual size and deny the command when the destination is obstructed.
-- When decorations block the normal position beside a bed, mounted players can use one clear position directly above the bed. A covered bed still denies the teleport.
+- Fixed `/home` moving mounted players and vehicles upward, sometimes onto roofs, when there was not enough room at the home.
+- Fixed mounted `/home` and `/spawn` teleports sometimes leaving clients out of sync with the vehicle and passengers.
+- Tightened `/spawn` placement rules so it chooses nearby safe ground with enough support and clear space for the player or vehicle.
 
 ## 1.1.0
 - Added JSON config system (`config/omwh.json`)

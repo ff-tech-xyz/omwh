@@ -9,8 +9,8 @@
   ],
   "contact": {
     "homepage": "https://pyrehaven.xyz",
-    "sources": "https://github.com/phred2026-cyber/omwh",
-    "issues": "https://github.com/phred2026-cyber/omwh/issues"
+    "sources": "https://github.com/ff-tech-xyz/omwh",
+    "issues": "https://github.com/ff-tech-xyz/omwh/issues"
   },
   "icon": "assets/omwh/icon.png",
   "environment": "*",

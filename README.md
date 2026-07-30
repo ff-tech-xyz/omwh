@@ -12,10 +12,10 @@ Built by **[PyreHaven](https://pyrehaven.xyz)** and used on the [PyreHaven Minec
 ## Commands
 
 ### `/home`
-Teleports you to your **respawn point** — your bed or respawn anchor, wherever it was last set. Works within the same dimension only (no cross-dimension teleport).
+Teleports you to your **respawn point** — your bed or respawn anchor, wherever it was last set. OMWH uses Minecraft's normal placement around that respawn point instead of moving you upward until it finds room. Works within the same dimension only (no cross-dimension teleport).
 
 ### `/spawn`
-Teleports you to the **spawn point of your current dimension**:
+Teleports you to a nearby safe position at the **spawn point of your current dimension**:
 - **Overworld** → world spawn
 - **Nether** → Nether spawn
 - **End** → the obsidian platform
@@ -23,7 +23,9 @@ Teleports you to the **spawn point of your current dimension**:
 Neither command crosses dimensions — you teleport to the spawn or home of whichever dimension you are already in.
 
 ### Mounts & Passengers
-If you are riding a mount (horse, boat, pig, strider, etc.), it comes with you. Any **passengers or entities inside your vehicle** — including other players — also teleport along.
+If you are riding a mount (horse, boat, pig, strider, etc.), it comes with you. Any **passengers or entities inside your vehicle** — including other players — stay attached through the teleport.
+
+OMWH checks that the destination can fit the vehicle before moving it. `/spawn` looks for nearby solid ground with enough clear space for the whole vehicle. At `/home`, Minecraft's normal bed position is used when it fits; a mounted player may instead be placed directly above an uncovered bed when the vehicle cannot fit beside it.
 
 ---
 
@@ -33,7 +35,7 @@ If you are riding a mount (horse, boat, pig, strider, etc.), it comes with you. 
 - **Configurable aliases** (e.g. `/h`, `/s`)
 - **Custom messages** with `{time}` placeholder support
 - **Teleport effects** — optional sound and particles on arrival
-- **Safe teleport** — won't drop you into the void
+- **Safe spawn placement** — requires solid support, clear space, and enough room for the player or vehicle
 - Works **singleplayer** or **server-side only** (clients don't need the mod)
 - Fully configurable via `config/omwh.json`
 
@@ -41,7 +43,7 @@ If you are riding a mount (horse, boat, pig, strider, etc.), it comes with you. 
 
 ## Installation
 
-1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 1.21.x
+1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 26.2
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api)
 3. Drop the JAR into your `mods/` folder
 4. Config auto-generates at `config/omwh.json` on first launch
@@ -72,8 +74,8 @@ Set any cooldown to `0` to disable it.
 
 - 💬 [PyreHaven Discord](https://discord.gg/tZ6Hx2ETA3) — ask questions and get help
 - 🌐 [PyreHaven Website](https://pyrehaven.xyz) — learn more about the organization
-- 🐙 [Source Code](https://github.com/phred2026-cyber/omwh)
-- 🐛 [Issues & Suggestions](https://github.com/phred2026-cyber/omwh/issues)
+- 🐙 [Source Code](https://github.com/ff-tech-xyz/omwh)
+- 🐛 [Issues & Suggestions](https://github.com/ff-tech-xyz/omwh/issues)
 
 ---
 
