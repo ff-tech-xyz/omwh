@@ -16,21 +16,23 @@ Questions or bug reports? Join the [PyreHaven Discord](https://discord.gg/tZ6Hx2
 
 Teleports a player to their current respawn point. That means their bed in the Overworld or their respawn anchor in the Nether, as long as the point is valid.
 
-`/home` stays in the player's current dimension. It will not move someone from the Nether back to an Overworld bed.
+OMWH uses Minecraft's normal placement around the respawn point instead of moving the player upward until it finds room. `/home` stays in the player's current dimension and will not move someone from the Nether back to an Overworld bed.
 
 ### `/spawn`
 
-Teleports a player to the spawn point for the dimension they are already in:
+Teleports a player to a nearby safe position at the spawn point for the dimension they are already in:
 
 - Overworld: the world spawn
 - Nether: the Nether spawn point
 - End: the obsidian platform
 
-Like `/home`, `/spawn` does not cross dimensions.
+OMWH requires solid support and enough clear space for the player or vehicle. Like `/home`, `/spawn` does not cross dimensions.
 
 ### Mounts and passengers
 
 If a player is riding something when they teleport, OMWH brings the ride with them. Horses, boats, pigs, striders, and similar mounts stay attached. Passengers inside the same vehicle, including other players, come along too.
+
+OMWH checks that the destination can fit the vehicle before moving it. `/spawn` looks for nearby safe ground with enough room for the whole vehicle. At `/home`, Minecraft's normal bed position is used when it fits; a mounted player may instead be placed directly above an uncovered bed when the vehicle cannot fit beside it.
 
 ---
 
@@ -42,13 +44,13 @@ If a player is riding something when they teleport, OMWH brings the ride with th
 - Supports custom command names, such as `/h` and `/s`
 - Lets you rewrite messages and use the `{time}` placeholder for cooldown warnings
 - Can play a sound and show particles when a teleport finishes
-- Uses safe teleport checks so players are not dropped into bad spots
+- Uses safe spawn placement with solid support and enough room for the player or vehicle
 
 ---
 
 ## Installation
 
-1. Install [Fabric Loader](https://fabricmc.net/use/) for the supported Minecraft version.
+1. Install [Fabric Loader](https://fabricmc.net/use/) for Minecraft 26.2.
 2. Install [Fabric API](https://modrinth.com/mod/fabric-api).
 3. Drop the OMWH jar into your `mods/` folder.
 4. Start the game or server once. OMWH creates `config/omwh.json` automatically.

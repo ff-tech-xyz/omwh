@@ -4,13 +4,17 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.omwh.OMWH;
 import com.omwh.config.ConfigManager;
-import com.omwh.utils.SafeTeleportUtils;
+import com.omwh.utils.HomeRespawnDecision;
+import com.omwh.utils.MountedHomeFallback;
 import com.omwh.utils.TeleportVehicles;
+import net.minecraft.core.BlockPos;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.portal.TeleportTransition;
+import net.minecraft.world.phys.Vec3;
 
 public class HomeCommand {
    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -52,65 +56,64 @@ public class HomeCommand {
        }
 
         var respawnConfig = player.getRespawnConfig();
-        var respawnData = respawnConfig != null ? respawnConfig.respawnData() : null;
-        if (respawnData == null || respawnData.pos() == null) {
+        boolean hasRespawnConfig = respawnConfig != null;
+        if (!hasRespawnConfig) {
             OMWH.MESSAGE_UTILS.sendMessage(player, cfg.noHomepointMessage);
             return false;
         }
 
-        var spawnLevel = player.level().getServer().getLevel(respawnData.dimension());
-        if (spawnLevel == null) {
+        // Ask vanilla for the same bed/anchor/forced-respawn destination used by death respawning.
+        // false is intentional: /home must not consume a respawn-anchor charge.
+        TeleportTransition respawn = player.findRespawnPositionAndUseSpawnBlock(
+                false, TeleportTransition.DO_NOTHING);
+        ServerLevel currentLevel = (ServerLevel) player.level();
+        ServerLevel targetLevel = respawn.newLevel();
+        var root = player.getRootVehicle();
+        boolean mounted = root != player;
+        boolean missingRespawnBlock = respawn.missingRespawnBlock();
+        boolean sameDimension = currentLevel.dimension().equals(targetLevel.dimension());
+        BlockPos homeBlock = respawnConfig.respawnData().pos();
+        boolean canCheckVehicle = mounted && !missingRespawnBlock && sameDimension;
+        boolean exactFits = !canCheckVehicle
+                || TeleportVehicles.hasExactRoom(root, targetLevel, respawn.position(), homeBlock);
+        boolean homeIsBed = canCheckVehicle
+                && targetLevel.getBlockState(homeBlock).getBlock() instanceof BedBlock;
+        Vec3 fallbackPosition = null;
+        boolean fallbackFits = false;
+        if (!exactFits && homeIsBed && !respawnConfig.forced()) {
+            MountedHomeFallback.Position fallback = MountedHomeFallback.aboveBed(
+                    homeBlock.getX(), homeBlock.getY(), homeBlock.getZ());
+            fallbackPosition = new Vec3(fallback.x(), fallback.y(), fallback.z());
+            fallbackFits = TeleportVehicles.hasExactRoom(
+                    root, targetLevel, fallbackPosition, homeBlock);
+        }
+        MountedHomeFallback.Choice destinationChoice = MountedHomeFallback.choose(
+                mounted, homeIsBed, respawnConfig.forced(), exactFits, fallbackFits);
+        boolean rootFits = destinationChoice != MountedHomeFallback.Choice.DENY;
+
+        HomeRespawnDecision.Outcome decision = HomeRespawnDecision.decide(
+                hasRespawnConfig, missingRespawnBlock, sameDimension, mounted, rootFits);
+        if (decision == HomeRespawnDecision.Outcome.NO_HOME) {
             OMWH.MESSAGE_UTILS.sendMessage(player, cfg.noHomepointMessage);
             return false;
         }
-        BlockPos spawnPos = respawnData.pos();
+        if (decision == HomeRespawnDecision.Outcome.CROSS_DIMENSION) {
+            OMWH.MESSAGE_UTILS.sendMessage(player, cfg.crossDimensionMessage);
+            return false;
+        }
+        if (decision == HomeRespawnDecision.Outcome.VEHICLE_TOO_BIG) {
+            OMWH.MESSAGE_UTILS.sendMessage(player,
+                    "§cYour vehicle is too big. Please dismount and try again.");
+            return false;
+        }
 
-       ServerLevel playerLevel = null;
-       try {
-           playerLevel = (ServerLevel) player.level();
-       } catch (Throwable ignored) { }
-       if (playerLevel == null) {
-           playerLevel = (ServerLevel) com.omwh.utils.WorldCompat.getLevel(player);
-           if (playerLevel == null) {
-               OMWH.MESSAGE_UTILS.sendMessage(player, cfg.crossDimensionMessage);
-               return false;
-           }
-       }
-
-       if (!playerLevel.dimension().equals(spawnLevel.dimension())) {
-           OMWH.MESSAGE_UTILS.sendMessage(player, cfg.crossDimensionMessage);
-           return false;
-       }
-
-       OMWH.EFFECTS_MANAGER.playTeleportEffects(player);
-
-       BlockPos bedTop = spawnPos.above();
-       int widthBlocks = 1;
-       int heightBlocks = 2;
-       var root = player.getRootVehicle();
-       boolean isRiding = root != player;
-       if (isRiding) {
-            widthBlocks = (int) Math.max(1, Math.ceil(root.getBbWidth()));
-            heightBlocks = (int) Math.max(2, Math.ceil(root.getBbHeight()));
-       }
-
-       // Search for safe spot within 5 blocks. Height + 1 for headroom (spawn 1 block up).
-       BlockPos safePos = SafeTeleportUtils.findSafeLocationForSize(spawnLevel, bedTop, 5, widthBlocks, heightBlocks + 1, false);
-
-       if (safePos == null) {
-             if (isRiding) {
-                  // Check if player alone could fit
-                  BlockPos fitPlayer = SafeTeleportUtils.findSafeLocationForSize(spawnLevel, bedTop, 5, 1, 3, false);
-                  if (fitPlayer != null) {
-                       OMWH.MESSAGE_UTILS.sendMessage(player, "§cYour vehicle is too big. Please dismount and try again.");
-                       return false;
-                  }
-             }
-             OMWH.MESSAGE_UTILS.sendMessage(player, cfg.unsafeHomeMessage);
-             return false;
-       }
-
-       TeleportVehicles.Result result = TeleportVehicles.teleportWithMount(player, spawnLevel, safePos);
+        OMWH.EFFECTS_MANAGER.playTeleportEffects(player);
+        Vec3 targetPosition = destinationChoice == MountedHomeFallback.Choice.ABOVE_BED
+                ? fallbackPosition : respawn.position();
+        float targetYaw = mounted ? root.getYRot() : respawn.yRot();
+        float targetPitch = mounted ? root.getXRot() : respawn.xRot();
+        TeleportVehicles.Result result = TeleportVehicles.teleportWithMount(
+                player, targetLevel, targetPosition, targetYaw, targetPitch);
        boolean teleportSuccessful = result.success;
        java.util.List<ServerPlayer> passengerPlayers = result.passengerPlayers;
 

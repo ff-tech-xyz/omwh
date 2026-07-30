@@ -6,7 +6,6 @@ import com.omwh.listeners.PlayerListener;
 import com.omwh.utils.CooldownManager;
 import com.omwh.utils.EffectsManager;
 import com.omwh.utils.MessageUtils;
-import com.omwh.utils.TeleportVehicles;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -28,7 +27,6 @@ public class OMWH implements ModInitializer {
       logger.info("OMWH Mod is initializing!");
 
       CommandRegistrar.init();
-      TeleportVehicles.ensureTickHook();
 
       if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
           PlayerListener playerListener = new PlayerListener(COOLDOWN_MANAGER);
