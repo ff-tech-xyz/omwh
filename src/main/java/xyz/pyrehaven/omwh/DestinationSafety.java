@@ -6,7 +6,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -756,10 +756,10 @@ public final class DestinationSafety {
 
     private static ConfiguredBed configuredBed(ServerLevel level, BlockPos homeBlock) {
         var homeState = level.getBlockState(homeBlock);
-        if (!(homeState.getBlock() instanceof BedBlock)) return new ConfiguredBed(null, null);
-        BlockPos other = homeBlock.relative(BedBlock.getConnectedDirection(homeState));
+        if (!(homeState.getBlock() instanceof AbstractBedBlock)) return new ConfiguredBed(null, null);
+        BlockPos other = homeBlock.relative(AbstractBedBlock.getConnectedDirection(homeState));
         return new ConfiguredBed(homeBlock,
-                level.getBlockState(other).getBlock() instanceof BedBlock ? other : null);
+                level.getBlockState(other).getBlock() instanceof AbstractBedBlock ? other : null);
     }
 
     static Bounds boundsAt(Entity entity, Vec3 position) {

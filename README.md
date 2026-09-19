@@ -27,10 +27,10 @@ A small server-owner override can contain only the fields being changed. For exa
 
 ## Requirements
 
-- Minecraft 26.2
-- Fabric Loader 0.19.3 or newer
+- Minecraft 26.3
+- Fabric Loader 0.19.5 or newer
 - Fabric API
-- Java 21 or newer
+- Java 25 or newer
 
 Install OMWH and Fabric API in the server's `mods` directory. The mod is server-side; clients do not need it.
 

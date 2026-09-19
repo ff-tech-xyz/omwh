@@ -3,45 +3,42 @@
 OMWH is a small server-side Fabric mod. Production behavior stays in one Java package so ownership is visible without an extra service or framework layer.
 
 ```text
-.
-├── .github/workflows/ci.yml         # Canonical CI build and regression gate
-├── .gitignore                       # Generated and local-file exclusions
-├── ARCHITECTURE.md                  # Contributor map and ownership notes
-├── BEHAVIOR.md                      # Player and server-owner contract
-├── CHANGELOG.md                     # Versioned player-facing changes
-├── CONFIGURATION.md                 # Persisted configuration contract
-├── LICENSE                          # CC0-1.0 legal text
-├── README.md                        # Installation and command overview
-├── build.gradle                     # Build plus canonical JavaExec regression tasks
-├── gradle.properties                # Project and dependency versions
-├── gradlew                          # Reproducible Unix Gradle launcher
-├── settings.gradle                  # Gradle project identity
+omwh/
+├── .github/workflows/ci.yml
+├── .gitignore
+├── ARCHITECTURE.md
+├── BEHAVIOR.md
+├── CHANGELOG.md
+├── CONFIGURATION.md
+├── LICENSE
+├── README.md
+├── build.gradle
+├── gradle.properties
+├── gradlew
+├── settings.gradle
 ├── gradle/
-│   ├── minecraft/
-│   │   ├── 26.2-custom.json         # Custom target-version metadata consumed by Loom
-│   │   └── identity-official-26.2.jar # Pinned identity mapping input
 │   └── wrapper/
-│       ├── gradle-wrapper.jar        # Reproducible wrapper bootstrap
-│       └── gradle-wrapper.properties # Wrapper distribution and checksum
+│       ├── gradle-wrapper.jar
+│       └── gradle-wrapper.properties
 └── src/
     ├── main/
     │   ├── java/xyz/pyrehaven/omwh/
-    │   │   ├── Omwh.java             # Fabric entrypoint and event registration
-    │   │   ├── OmwhConfig.java       # JSON loading, defaults, and validation
-    │   │   ├── OmwhCommands.java     # Command admission, pending scheduler, feedback, effects
-    │   │   ├── Cooldowns.java        # Cooldown timestamps and admission results
-    │   │   ├── HomeDestination.java  # Saved-home policy and Minecraft adapter
-    │   │   ├── SpawnDestination.java # Dimension routing and spawn search state machine
-    │   │   ├── DestinationSafety.java # Terrain ownership, geometry, probes, and tickets
-    │   │   └── TeleportService.java  # Root/passenger lifecycle and sole movement owner
+    │   │   ├── Omwh.java
+    │   │   ├── OmwhConfig.java
+    │   │   ├── OmwhCommands.java
+    │   │   ├── Cooldowns.java
+    │   │   ├── HomeDestination.java
+    │   │   ├── SpawnDestination.java
+    │   │   ├── DestinationSafety.java
+    │   │   └── TeleportService.java
     │   └── resources/
-    │       ├── fabric.mod.json        # Fabric metadata and runtime requirements
-    │       └── assets/omwh/icon.png   # Packaged icon
+    │       ├── fabric.mod.json
+    │       └── assets/omwh/icon.png
     └── test/java/xyz/pyrehaven/omwh/
-        ├── ConfigTest.java            # Parsing, defaults, and persisted validation
-        ├── CommandsAndCooldownsTest.java # Commands, events, scheduling, cleanup, feedback
-        ├── DestinationsTest.java      # Home/spawn policy, terrain, probes, and work bounds
-        └── TeleportServiceTest.java   # Passenger lifecycle, mutation, and reconciliation
+        ├── ConfigTest.java
+        ├── CommandsAndCooldownsTest.java
+        ├── DestinationsTest.java
+        └── TeleportServiceTest.java
 ```
 
 ## Dependency direction
@@ -52,7 +49,7 @@ Tests exercise dependency-free policy seams and the production scheduler. A poli
 
 ## Contributor notes
 
-Minecraft 26.2's saved-respawn and End-arrival algorithms are version-coupled boundaries. Recheck the mapped vanilla reads, order, and side effects on a Minecraft update. Work and chunk constants sit beside the production loops they bound, and traversal/state-machine comments record invariants that are not obvious from local syntax.
+Minecraft 26.3's saved-respawn and End-arrival algorithms are version-coupled boundaries. Recheck the mapped vanilla reads, order, and side effects on a Minecraft update. Work and chunk constants sit beside the production loops they bound, and traversal/state-machine comments record invariants that are not obvious from local syntax.
 
 Before submitting a change, run:
 
