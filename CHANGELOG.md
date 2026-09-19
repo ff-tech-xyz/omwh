@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Updated OMWH for Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.160.7, and Java 25.
+- Updated OMWH for Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0, and Java 25.
 - `/home` now recognizes Minecraft 26.3's straw beds and applies the same saved-home terrain preparation and safety rules used for other beds.
 
 ## [1.2.0] - 2026-08-24
