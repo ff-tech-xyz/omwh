@@ -2,6 +2,10 @@
 
 OMWH adds server-side `/home` and `/spawn` commands that use Minecraft's own saved-home and world-spawn destinations. Players can bring mounted vehicles and passengers without installing anything on their client.
 
+*A bed marks the home destination.*
+
+![A bed at the bottom of a ravine](docs/images/saved-home.jpg)
+
 ## Commands
 
 - `/home` goes to your bed or charged respawn anchor. Cross-dimension homes work when enabled.
@@ -10,9 +14,21 @@ OMWH adds server-side `/home` and `/spawn` commands that use Minecraft's own sav
 
 Normal teleports check build height, world borders, support, fluids, hazards, collision, and the full mounted footprint. If terrain is not ready, OMWH spreads preparation and searching across server ticks instead of doing an unbounded burst of work. A force command still prepares Minecraft's destination terrain before moving anything.
 
+*Running `/home` while riding with a passenger.*
+
+![A player and villager in a boat with the home command entered](docs/images/mounted-home-command.jpg)
+
+*The boat and its passenger group arrive together.*
+
+![The player, villager and boat at the saved-home destination](docs/images/mounted-arrival.jpg)
+
 ## Cooldowns and feedback
 
 Server owners can configure regular, PvP, damage, and join cooldown durations. A duration of `0` disables that cooldown; join follows this rule without a separate enable switch. Messages, command names, sound, particles, force access, cross-dimension homes, and per-dimension spawn routing are configurable in `config/omwh.json`.
+
+*The join cooldown blocks teleporting until the configured wait has passed.*
+
+![A join-cooldown warning while the player and villager wait in a boat](docs/images/join-cooldown.jpg)
 
 See [BEHAVIOR.md](BEHAVIOR.md) for player and server-owner behavior, and [CONFIGURATION.md](CONFIGURATION.md) for every field, default, placeholder, and validation rule.
 
