@@ -1,6 +1,6 @@
 # OMWH — On My Way Home
 
-OMWH adds `/home` and `/spawn` commands that bring your boat, minecart or mount and its passengers with you. Bring a villager home in a boat without leaving either behind.
+OMWH is a server-side Fabric mod that adds `/home` and `/spawn` commands. Bring your boat, minecart or mount and its passengers with you, whether you're riding home or transporting a villager.
 
 ![A bed at the bottom of a ravine](docs/images/saved-home.jpg)
 
@@ -20,11 +20,22 @@ OMWH checks that the destination is safe and has room for your whole group befor
 
 ![The player, villager and boat at the saved-home destination](docs/images/mounted-arrival.jpg)
 
+## Cooldowns
+
+Cooldowns control how often players can teleport and prevent immediate escapes from combat. All four are enabled by default:
+
+- **Regular — 30 seconds:** the wait after using `/home` or `/spawn`.
+- **PvP — 45 seconds:** applies to both players when one damages the other.
+- **Damage — 10 seconds:** applies after taking damage from other sources, such as mobs or falls.
+- **Join — 30 seconds:** the wait after joining the server or opening a single-player world.
+
+*Cooldown messages show the remaining wait.*
+
+![A join-cooldown warning while the player and villager wait in a boat](docs/images/join-cooldown.jpg)
+
 ## Configuration
 
 Edit `config/omwh.json` to change cooldowns, command names, messages, sounds, particles and dimension settings. Set a cooldown to `0` to disable it, then restart the server or reopen your single-player world to apply changes.
-
-![A join-cooldown warning while the player and villager wait in a boat](docs/images/join-cooldown.jpg)
 
 See the [configuration guide](CONFIGURATION.md) for all settings and defaults, or the [behavior guide](BEHAVIOR.md) for destination and passenger rules.
 

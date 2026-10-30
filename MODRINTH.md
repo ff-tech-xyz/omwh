@@ -1,6 +1,6 @@
 # OMWH — On My Way Home
 
-OMWH gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Riding a horse or bringing a villager home in a boat? They make the trip with you.
+OMWH is a server-side Fabric mod that gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Riding a horse or bringing a villager home in a boat? They make the trip with you.
 
 Your home is Minecraft's own respawn point, so there's no separate home to set. Players don't need to install anything to join a server running OMWH.
 
@@ -12,7 +12,7 @@ Your home is Minecraft's own respawn point, so there's no separate home to set. 
 
 Stay in your boat, minecart or mount and run `/home` or `/spawn`. OMWH brings the vehicle and its passengers along, checking that there's room for the group to arrive safely.
 
-*One boat, one villager, one `/home`.*
+*Use `/home` without getting out of the boat.*
 
 ![A player and villager in a boat with the home command entered](https://cdn.modrinth.com/data/25MUGzDH/images/4d4fdb070dc5a196c5ac6f0c29ab95c8cdb9dd00.jpg)
 
@@ -24,27 +24,34 @@ If a destination isn't safe, OMWH stops the teleport. You can use `/home force` 
 
 **Force is enabled for everyone by default.** OMWH has no permission nodes; server owners can turn force off for everyone in the config.
 
-## Make it work for your world
+## Cooldowns
 
-Want a shorter wait between trips? No wait after joining? Different messages? Open `config/omwh.json` after the first launch and change the settings you want.
+Cooldowns control how often players can teleport and prevent immediate escapes from combat. All four are enabled by default:
 
-*The boat's ready. The join cooldown has other plans.*
+- **Regular — 30 seconds:** the wait after using `/home` or `/spawn`.
+- **PvP — 45 seconds:** applies to both players when one damages the other.
+- **Damage — 10 seconds:** applies after taking damage from other sources, such as mobs or falls.
+- **Join — 30 seconds:** the wait after joining the server or opening a single-player world.
+
+*Cooldown messages show the remaining wait.*
 
 ![A join-cooldown warning while the player and villager wait in a boat](https://cdn.modrinth.com/data/25MUGzDH/images/f246fb44b41fd2b188591c3dc8ffc7113b1e4203.jpg)
 
-For example, these settings give teleports a 15-second cooldown, remove the wait after joining and turn off force commands:
+## Configuration
+
+Edit `config/omwh.json` after the first launch to change cooldowns, command names, messages, sounds, particles and dimension routing. Set a cooldown to `0` to disable it.
+
+For example, this changes the regular cooldown to 15 seconds:
 
 ```json
 {
-  "regularCooldownSeconds": 15,
-  "joinCooldownSeconds": 0,
-  "enableForceOverride": false
+  "regularCooldownSeconds": 15
 }
 ```
 
-These are a few settings, not a replacement for your whole config. Change the matching entries in your file, then **restart the server or reopen your single-player world**. OMWH doesn't have a reload command.
+Change the matching entry in your file, then **restart the server or reopen your single-player world** to apply your settings.
 
-You can also change command names, combat and damage cooldowns, messages, sounds, particles and dimension routing. Cross-dimension homes are enabled by default. By default, `/spawn` sends you to Overworld spawn; enable the other dimension settings if you want it to keep you in the Nether, End or a modded dimension.
+Cross-dimension homes are enabled by default. `/spawn` sends you to Overworld spawn unless you enable separate routing for other dimensions.
 
 See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md) for every setting and default, or the [behavior guide](https://github.com/ff-tech-xyz/omwh/blob/main/BEHAVIOR.md) for destination checks and passenger limits.
 
