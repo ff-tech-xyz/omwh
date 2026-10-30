@@ -1,12 +1,12 @@
 # OMWH — On My Way Home
 
-Get home without leaving your ride behind. OMWH adds `/home` and `/spawn` to Minecraft, bringing your boat, minecart or mount along with you. Friends and mobs can come too, as long as they're riding as passengers.
+Get home the simple way. OMWH's `/home` takes you back to your Minecraft respawn point: the bed or charged respawn anchor you'd return to after dying, without having to die first. There's no `/sethome` command and no list of warps to manage. Minecraft already knows where home is.
 
 It's a server-side Fabric mod, so players don't need to install anything to join your server.
 
 ## A bed is all you need
 
-Sleep in a bed or set your respawn point at a charged respawn anchor, then use `/home` whenever you're ready to head back. OMWH uses your Minecraft respawn point, so there's no separate home to set. Use `/spawn` to return to world spawn instead.
+Sleep in a bed or set your respawn point at a charged respawn anchor, then head out and explore. When you're ready to return, type `/home`. You can also use `/spawn` to go to world spawn.
 
 ![A bed at the bottom of a ravine](docs/images/saved-home.jpg)
 
@@ -14,7 +14,7 @@ Sleep in a bed or set your respawn point at a charged respawn anchor, then use `
 
 ## Bring everyone along
 
-Found a villager you want to bring home? Get in the boat with them, then run `/home`. The boat and its passengers make the trip together. The same works with minecarts and mounts, and you can use `/spawn` while riding too.
+Found a villager you want to bring home? Get in the boat with them, then run `/home`. The boat and its passengers make the trip together. The same works with minecarts and mounts, and you can use `/spawn` while riding too. Other players and any mob can come along as passengers.
 
 ![A player and villager in a boat with the home command entered](docs/images/mounted-home-command.jpg)
 
