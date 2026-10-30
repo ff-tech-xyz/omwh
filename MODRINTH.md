@@ -1,73 +1,79 @@
 # OMWH — On My Way Home
 
-OMWH is a server-side Fabric mod that gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Bring your boat, minecart or mount home with friends. Any mob, including other players, can come along as a passenger.
+Get home the simple way. OMWH's `/home` takes you back to your Minecraft respawn point: the bed or charged respawn anchor you'd return to after dying, without having to die first. There's no `/sethome` command and no list of warps to manage. Minecraft already knows where home is.
 
-Your home is Minecraft's own respawn point, so there's no separate home to set. Players don't need to install anything to join a server running OMWH.
+It's a server-side Fabric mod, so players don't need to install anything to join your server.
 
-*Home doesn't have to be fancy. A bed will do.*
+## A bed is all you need
+
+Sleep in a bed or set your respawn point at a charged respawn anchor, then head out and explore. When you're ready to return, type `/home`. You can also use `/spawn` to go to world spawn.
 
 ![A bed at the bottom of a ravine](https://cdn.modrinth.com/data/25MUGzDH/images/c163474c1fb3711514529475097289e6bf5edd86.jpg)
 
-## Bring your ride. And your friends.
+*Home doesn't have to be fancy.*
 
-Stay in your boat, minecart or mount and run `/home` or `/spawn`. OMWH brings the vehicle and its passengers along, checking that there's room for the group to arrive safely.
+## Bring everyone along
 
-*Use `/home` without getting out of the boat.*
+Found a villager you want to bring home? Get in the boat with them, then run `/home`. The boat and its passengers make the trip together. The same works with minecarts and mounts, and you can use `/spawn` while riding too. Other players and any mob can come along as passengers.
 
 ![A player and villager in a boat with the home command entered](https://cdn.modrinth.com/data/25MUGzDH/images/4d4fdb070dc5a196c5ac6f0c29ab95c8cdb9dd00.jpg)
 
-*Back at the bed, friends included.*
+*No need to get out first.*
 
 ![The player, villager and boat at the saved-home destination](https://cdn.modrinth.com/data/25MUGzDH/images/dcfc8d39aed89561ce3523edcbd39a88e3005535.jpg)
 
-If a destination isn't safe, OMWH stops the teleport. You can use `/home force` or `/spawn force` to skip safety and vehicle-size checks, but cooldowns and destination rules still apply. Force can't give you a missing home.
+*Back at the bed, villager included.*
 
-**Force is enabled for everyone by default.** OMWH has no permission nodes; server owners can turn force off for everyone in the config.
+OMWH checks the destination before moving you and your ride. If it isn't safe or your vehicle won't fit, the teleport stops. `/home force` and `/spawn force` let you skip those checks, but cooldowns still apply. Force is available to everyone by default; server owners can turn it off.
 
-## Cross-dimension teleporting
+## Home can be in another dimension
 
-Cross-dimension teleporting is enabled by default. `/home` returns you to your saved respawn point even when it's in another dimension. For example, you can return from the Nether to your Overworld bed, or from the Overworld to your charged respawn anchor in the Nether. Your vehicle and passengers come with you.
+Exploring the Nether? `/home` can take you straight back to your Overworld bed. If your home is a charged respawn anchor in the Nether, you can travel the other way too. Your ride and passengers come with you.
 
-By default, `/spawn` takes you to Overworld spawn from any dimension. Enable `enableNetherSpawn`, `enableEndSpawn` or `enableModdedDimensionSpawn` to keep `/spawn` in that dimension instead. End routing uses Minecraft's End arrival point.
+Cross-dimension travel is enabled by default, and `/spawn` takes you to Overworld spawn from any dimension. Server owners can disable travel between dimensions or keep `/spawn` within the player's current dimension. The [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md#dimension-routing) explains those options, including the End's arrival point.
 
-Set `enableCrossDimensionTeleport` to `false` to stop travel between dimensions. `/home` then requires your home to be in your current dimension. `/spawn` still works where that dimension's spawn route is enabled; otherwise it is blocked rather than sending you to the Overworld. `enableOverworldSpawn` controls access to Overworld spawn.
+## A short wait between trips
 
-## Cooldowns
+Cooldowns keep teleporting useful without making it an instant escape from a fight. By default, you'll wait:
 
-Cooldowns control how often players can teleport and prevent immediate escapes from combat. All four are enabled by default:
-
-- **Regular — 30 seconds:** the wait after using `/home` or `/spawn`.
-- **PvP — 45 seconds:** applies to both players when one damages the other.
-- **Damage — 10 seconds:** applies after taking damage from other sources, such as mobs or falls.
-- **Join — 30 seconds:** the wait after joining the server or opening a single-player world.
-
-*Cooldown messages show the remaining wait.*
+- **30 seconds** after a successful teleport before using `/home` or `/spawn` again.
+- **45 seconds** after PvP damage, for both players involved.
+- **10 seconds** after other damage, such as a mob attack or a fall.
+- **30 seconds** after joining a server or opening a single-player world.
 
 ![A join-cooldown warning while the player and villager wait in a boat](https://cdn.modrinth.com/data/25MUGzDH/images/f246fb44b41fd2b188591c3dc8ffc7113b1e4203.jpg)
 
-## Configuration
+*The message tells you how long is left.*
 
-Edit `config/omwh.json` after the first launch to change cooldowns, command names, messages, sounds, particles and dimension routing. Set a cooldown to `0` to disable it.
+## Make it fit your world
 
-For example, this changes the regular cooldown to 15 seconds:
+Launch the server or open your single-player world once to generate `config/omwh.json`. Open that file to adjust cooldowns, rename commands, change messages, sounds and particles, or choose how travel between dimensions works.
 
-```json
-{
-  "regularCooldownSeconds": 15
-}
-```
+For example, change `regularCooldownSeconds` to `15` for a shorter wait between trips, or `0` to remove that cooldown. Save the file, then restart the server or reopen your world to apply the change.
 
-Change the matching entry in your file, then **restart the server or reopen your single-player world** to apply your settings.
-
-See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md) for every setting and default, or the [behavior guide](https://github.com/ff-tech-xyz/omwh/blob/main/BEHAVIOR.md) for destination checks and passenger limits.
+See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md) for every setting and default. The [behavior guide](https://github.com/ff-tech-xyz/omwh/blob/main/BEHAVIOR.md) covers the finer details of destinations and passenger groups.
 
 ## Installation
 
-For **Minecraft 26.3**, install OMWH and **Fabric API** with **Fabric Loader 0.19.5+** and **Java 25+**. Use [Fabric API 0.161.0](https://modrinth.com/mod/fabric-api/version/bNnaTiuM) or a later compatible release. Builds for older Minecraft versions are available under **Versions**.
+For **OMWH 1.2.1**, you need:
 
-- **Single-player:** put both JARs in your Fabric client's `mods` folder.
-- **Multiplayer:** put both JARs in the server's `mods` folder. Players don't need OMWH or Fabric on their clients.
+- Minecraft 26.3
+- Fabric Loader 0.19.5 or newer
+- Fabric API for Minecraft 26.3 (the 1.2.1 release uses 0.161.0)
+- Java 25 or newer
 
-**Upgrading?** Remove the old OMWH JAR before adding the new one. Keep only one copy in `mods`.
+Download OMWH from [Modrinth](https://modrinth.com/mod/omwh).
 
-[Source](https://github.com/ff-tech-xyz/omwh) · [Report an issue](https://github.com/ff-tech-xyz/omwh/issues) · [Discord](https://discord.gg/tZ6Hx2ETA3) · [PyreHaven](https://pyrehaven.xyz)
+- **Single-player:** put OMWH and Fabric API in your Fabric client's `mods` folder.
+- **Multiplayer:** put both JARs in the server's `mods` folder.
+
+## Links
+
+- [PyreHaven](https://pyrehaven.xyz)
+- [Discord](https://discord.gg/tZ6Hx2ETA3)
+- [Report an issue](https://github.com/ff-tech-xyz/omwh/issues)
+- [Building and architecture](https://github.com/ff-tech-xyz/omwh/blob/main/ARCHITECTURE.md)
+
+## License
+
+[CC0 1.0 Universal](https://github.com/ff-tech-xyz/omwh/blob/main/LICENSE)
