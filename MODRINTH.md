@@ -1,6 +1,6 @@
 # OMWH — On My Way Home
 
-OMWH is a server-side Fabric mod that gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Riding a horse or bringing a villager home in a boat? They make the trip with you.
+OMWH is a server-side Fabric mod that gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Bring your boat, minecart or mount home with friends. Any mob, including other players, can come along as a passenger.
 
 Your home is Minecraft's own respawn point, so there's no separate home to set. Players don't need to install anything to join a server running OMWH.
 
@@ -8,7 +8,7 @@ Your home is Minecraft's own respawn point, so there's no separate home to set. 
 
 ![A bed at the bottom of a ravine](https://cdn.modrinth.com/data/25MUGzDH/images/c163474c1fb3711514529475097289e6bf5edd86.jpg)
 
-## Bring the boat. And the villager.
+## Bring your ride. And your friends.
 
 Stay in your boat, minecart or mount and run `/home` or `/spawn`. OMWH brings the vehicle and its passengers along, checking that there's room for the group to arrive safely.
 
@@ -16,7 +16,7 @@ Stay in your boat, minecart or mount and run `/home` or `/spawn`. OMWH brings th
 
 ![A player and villager in a boat with the home command entered](https://cdn.modrinth.com/data/25MUGzDH/images/4d4fdb070dc5a196c5ac6f0c29ab95c8cdb9dd00.jpg)
 
-*Back at the bed, villager included.*
+*Back at the bed, friends included.*
 
 ![The player, villager and boat at the saved-home destination](https://cdn.modrinth.com/data/25MUGzDH/images/dcfc8d39aed89561ce3523edcbd39a88e3005535.jpg)
 

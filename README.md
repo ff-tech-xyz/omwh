@@ -1,6 +1,6 @@
 # OMWH — On My Way Home
 
-OMWH is a server-side Fabric mod that adds `/home` and `/spawn` commands. Bring your boat, minecart or mount and its passengers with you, whether you're riding home or transporting a villager.
+OMWH is a server-side Fabric mod that adds `/home` and `/spawn` commands. Bring your boat, minecart or mount home with friends. Any mob, including other players, can come along as a passenger.
 
 ![A bed at the bottom of a ravine](docs/images/saved-home.jpg)
 
