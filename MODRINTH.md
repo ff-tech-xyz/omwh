@@ -24,6 +24,14 @@ If a destination isn't safe, OMWH stops the teleport. You can use `/home force` 
 
 **Force is enabled for everyone by default.** OMWH has no permission nodes; server owners can turn force off for everyone in the config.
 
+## Cross-dimension teleporting
+
+Cross-dimension teleporting is enabled by default. `/home` returns you to your saved respawn point even when it's in another dimension. For example, you can return from the Nether to your Overworld bed, or from the Overworld to your charged respawn anchor in the Nether. Your vehicle and passengers come with you.
+
+By default, `/spawn` takes you to Overworld spawn from any dimension. Enable `enableNetherSpawn`, `enableEndSpawn` or `enableModdedDimensionSpawn` to keep `/spawn` in that dimension instead. End routing uses Minecraft's End arrival point.
+
+Set `enableCrossDimensionTeleport` to `false` to stop travel between dimensions. `/home` then requires your home to be in your current dimension. `/spawn` still works where that dimension's spawn route is enabled; otherwise it is blocked rather than sending you to the Overworld. `enableOverworldSpawn` controls access to Overworld spawn.
+
 ## Cooldowns
 
 Cooldowns control how often players can teleport and prevent immediate escapes from combat. All four are enabled by default:
@@ -50,8 +58,6 @@ For example, this changes the regular cooldown to 15 seconds:
 ```
 
 Change the matching entry in your file, then **restart the server or reopen your single-player world** to apply your settings.
-
-Cross-dimension homes are enabled by default. `/spawn` sends you to Overworld spawn unless you enable separate routing for other dimensions.
 
 See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md) for every setting and default, or the [behavior guide](https://github.com/ff-tech-xyz/omwh/blob/main/BEHAVIOR.md) for destination checks and passenger limits.
 

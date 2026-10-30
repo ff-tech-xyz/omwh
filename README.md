@@ -6,8 +6,8 @@ OMWH is a server-side Fabric mod that adds `/home` and `/spawn` commands. Bring 
 
 ## Commands
 
-- `/home` returns you to your bed or charged respawn anchor, including across dimensions by default.
-- `/spawn` takes you to Overworld spawn by default. Server owners can configure separate destinations for other dimensions.
+- `/home` returns you to your bed or charged respawn anchor.
+- `/spawn` takes you to world spawn, following the dimension settings below.
 - `/home force` and `/spawn force` skip safety and vehicle-size checks. Cooldowns still apply. Force commands are available to everyone by default; server owners can disable them.
 
 OMWH checks that the destination is safe and has room for your whole group before teleporting.
@@ -19,6 +19,14 @@ OMWH checks that the destination is safe and has room for your whole group befor
 *The boat and its passengers arrive together.*
 
 ![The player, villager and boat at the saved-home destination](docs/images/mounted-arrival.jpg)
+
+## Cross-dimension teleporting
+
+Cross-dimension teleporting is enabled by default. `/home` returns you to your saved respawn point even when it's in another dimension. For example, you can return from the Nether to your Overworld bed, or from the Overworld to your charged respawn anchor in the Nether. Your vehicle and passengers come with you.
+
+By default, `/spawn` takes you to Overworld spawn from any dimension. Enable `enableNetherSpawn`, `enableEndSpawn` or `enableModdedDimensionSpawn` to keep `/spawn` in that dimension instead. End routing uses Minecraft's End arrival point.
+
+Set `enableCrossDimensionTeleport` to `false` to stop travel between dimensions. `/home` then requires your home to be in your current dimension. `/spawn` still works where that dimension's spawn route is enabled; otherwise it is blocked rather than sending you to the Overworld. `enableOverworldSpawn` controls access to Overworld spawn.
 
 ## Cooldowns
 
