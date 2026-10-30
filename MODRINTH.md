@@ -1,53 +1,60 @@
-# OMWH
+# OMWH — On My Way Home
 
-OMWH adds server-side `/home` and `/spawn` commands that use Minecraft's own saved-home and world-spawn destinations. Players don't need to install anything on their clients.
+OMWH gets you home without leaving your ride behind. Use `/home` to return to your bed or charged respawn anchor, or `/spawn` to head back to world spawn. Riding a horse or bringing a villager home in a boat? They make the trip with you.
 
+Your home is Minecraft's own respawn point, so there's no separate home to set. Players don't need to install anything to join a server running OMWH.
 
-*A bed marks the home destination.*
+*Home doesn't have to be fancy. A bed will do.*
 
-![Saved home](https://cdn.modrinth.com/data/25MUGzDH/images/c163474c1fb3711514529475097289e6bf5edd86.jpg)
+![A bed at the bottom of a ravine](https://cdn.modrinth.com/data/25MUGzDH/images/c163474c1fb3711514529475097289e6bf5edd86.jpg)
 
-## Commands
+## Bring the boat. And the villager.
 
-- `/home` goes to your bed, charged respawn anchor, or server-set respawn point.
-- `/spawn` goes to the spawn destination for your current dimension, with optional fallback to Overworld spawn.
-- `/home force` and `/spawn force` skip OMWH's destination-safety and vehicle-size checks. They still respect cooldowns, missing destinations, disabled routes, unavailable worlds, and teleport failures.
+Stay in your boat, minecart or mount and run `/home` or `/spawn`. OMWH brings the vehicle and its passengers along, checking that there's room for the group to arrive safely.
 
-If you're riding a boat, minecart, horse, or another mount, OMWH moves the vehicle and its whole passenger group together. Normal teleports check support, fluids, hazards, collision, world borders, and the full mounted footprint before moving anything.
+*One boat, one villager, one `/home`.*
 
+![A player and villager in a boat with the home command entered](https://cdn.modrinth.com/data/25MUGzDH/images/4d4fdb070dc5a196c5ac6f0c29ab95c8cdb9dd00.jpg)
 
-*Running /home while riding with a passenger.*
+*Back at the bed, villager included.*
 
-![Mounted home command](https://cdn.modrinth.com/data/25MUGzDH/images/4d4fdb070dc5a196c5ac6f0c29ab95c8cdb9dd00.jpg)
+![The player, villager and boat at the saved-home destination](https://cdn.modrinth.com/data/25MUGzDH/images/dcfc8d39aed89561ce3523edcbd39a88e3005535.jpg)
 
-*The boat and its passenger group arrive together.*
+If a destination isn't safe, OMWH stops the teleport. You can use `/home force` or `/spawn force` to skip safety and vehicle-size checks, but cooldowns and destination rules still apply. Force can't give you a missing home.
 
-![mounted arrival](https://cdn.modrinth.com/data/25MUGzDH/images/dcfc8d39aed89561ce3523edcbd39a88e3005535.jpg)
+**Force is enabled for everyone by default.** OMWH has no permission nodes; server owners can turn force off for everyone in the config.
 
-## Before you install
+## Make it work for your world
 
-- **OMWH has no permission nodes.** Every player who can run `/home` can also run `/home force` and skip safety checks. Force is enabled by default and can only be turned off globally with `enableForceOverride`.
-- **Cross-dimension `/home` is enabled by default** through `enableCrossDimensionTeleport`.
-- **`/spawn` is Overworld-only by default.** Nether, End, and modded-dimension spawn destinations stay disabled until you enable them.
-- **Configuration is read only at server startup.** OMWH has no reload command, so restart after editing `config/omwh.json`.
-- **Upgrading? Delete the old OMWH jar first.** Two OMWH jars in `mods` stop Fabric Loader on a duplicate mod ID.
-- Passenger groups are limited to 64 entities. Normal mounted searches refuse roots wider than 14 blocks or groups needing more than 16 blocks of clear height.
+Want a shorter wait between trips? No wait after joining? Different messages? Open `config/omwh.json` after the first launch and change the settings you want.
 
+*The boat's ready. The join cooldown has other plans.*
 
-*The join cooldown blocks teleporting until the configured wait has passed.*
+![A join-cooldown warning while the player and villager wait in a boat](https://cdn.modrinth.com/data/25MUGzDH/images/f246fb44b41fd2b188591c3dc8ffc7113b1e4203.jpg)
 
-![Join cooldown](https://cdn.modrinth.com/data/25MUGzDH/images/f246fb44b41fd2b188591c3dc8ffc7113b1e4203.jpg)
+For example, these settings give teleports a 15-second cooldown, remove the wait after joining and turn off force commands:
 
-## Server setup
+```json
+{
+  "regularCooldownSeconds": 15,
+  "joinCooldownSeconds": 0,
+  "enableForceOverride": false
+}
+```
 
-Command names, cooldowns, messages, sounds, particles, force access, cross-dimension homes, and per-dimension spawn routing all live in `config/omwh.json`. Every field, default, and placeholder is documented in [CONFIGURATION.md](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md).
+These are a few settings, not a replacement for your whole config. Change the matching entries in your file, then **restart the server or reopen your single-player world**. OMWH doesn't have a reload command.
 
-The latest release targets **Minecraft 26.3** and needs Fabric Loader 0.19.5 or newer, [Fabric API 0.161.0](https://modrinth.com/mod/fabric-api/version/bNnaTiuM), and Java 25 or newer. Older files for 26.1.2 and 1.21.11 remain available under Versions. OMWH is server-side and also works in singleplayer.
+You can also change command names, combat and damage cooldowns, messages, sounds, particles and dimension routing. Cross-dimension homes are enabled by default. By default, `/spawn` sends you to Overworld spawn; enable the other dimension settings if you want it to keep you in the Nether, End or a modded dimension.
 
-## Links
+See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONFIGURATION.md) for every setting and default, or the [behavior guide](https://github.com/ff-tech-xyz/omwh/blob/main/BEHAVIOR.md) for destination checks and passenger limits.
 
-- [Source code](https://github.com/ff-tech-xyz/omwh)
-- [Issues and suggestions](https://github.com/ff-tech-xyz/omwh/issues)
-- [PyreHaven Discord](https://discord.gg/tZ6Hx2ETA3)
+## Installation
 
-Made by PyreHaven. Find out more about us at [PyreHaven.xyz](https://pyrehaven.xyz).
+For **Minecraft 26.3**, install OMWH and **Fabric API** with **Fabric Loader 0.19.5+** and **Java 25+**. Use [Fabric API 0.161.0](https://modrinth.com/mod/fabric-api/version/bNnaTiuM) or a later compatible release. Builds for older Minecraft versions are available under **Versions**.
+
+- **Single-player:** put both JARs in your Fabric client's `mods` folder.
+- **Multiplayer:** put both JARs in the server's `mods` folder. Players don't need OMWH or Fabric on their clients.
+
+**Upgrading?** Remove the old OMWH JAR before adding the new one. Keep only one copy in `mods`.
+
+[Source](https://github.com/ff-tech-xyz/omwh) · [Report an issue](https://github.com/ff-tech-xyz/omwh/issues) · [Discord](https://discord.gg/tZ6Hx2ETA3) · [PyreHaven](https://pyrehaven.xyz)
