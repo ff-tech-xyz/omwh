@@ -1,6 +1,6 @@
 # OMWH — On My Way Home
 
-Get home the simple way. OMWH's `/home` takes you back to your Minecraft respawn point: the bed or charged respawn anchor you'd return to after dying, without having to die first. There's no `/sethome` command and no list of warps to manage. Minecraft already knows where home is.
+Your bed already tells Minecraft where home is; OMWH lets you return without dying first. Use `/home` to go back to your saved bed or charged respawn anchor. There's no separate `/sethome` command or list of warps to manage, just the respawn point you already use.
 
 It's a server-side Fabric mod, so players don't need to install anything to join your server.
 
@@ -24,7 +24,7 @@ Found a villager you want to bring home? Get in the boat with them, then run `/h
 
 *Back at the bed, villager included.*
 
-OMWH checks the destination before moving you and your ride. If it isn't safe or your vehicle won't fit, the teleport stops. `/home force` and `/spawn force` let you skip those checks, but cooldowns still apply. Force is available to everyone by default; server owners can turn it off.
+Before moving you and your ride, OMWH checks that the destination is safe and has room for the vehicle. If either check fails, you stay where you are. `/home force` and `/spawn force` let you skip those checks, but cooldowns still apply. Force is available to everyone by default; server owners can turn it off.
 
 ## Home can be in another dimension
 
