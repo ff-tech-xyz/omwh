@@ -12,7 +12,7 @@ Normal `/home` asks Minecraft to resolve the saved bed, bunk bed, or charged res
 
 ### `/spawn`
 
-`/spawn` follows the enabled route for the player's current dimension. Normal non-End routes search a deterministic origin-first sequence for a safe position. End routing uses Minecraft's End-arrival result and checks that exact destination rather than searching away from it.
+`/spawn` follows the enabled route for the player's current dimension. Normal non-End routes search for the nearest safe position: columns closest to the spawn anchor come first, and each column is checked at the anchor height, then one up, one down, and so on, within 16 blocks. Ground can be any block whose top is between half and a full block high and spans the whole cell, such as slabs and dirt paths. Carpets and thin snow at foot level do not block a spot. End routing uses Minecraft's End-arrival result and checks that exact destination rather than searching away from it.
 
 A force command skips OMWH's safety and mounted-size policy only. It does not create missing homes or world spawns, enable disabled dimensions, bypass cooldowns, repair unavailable worlds, or hide teleport failures.
 
@@ -26,7 +26,7 @@ Regular cooldown starts after a successful teleport. Join cooldown starts when t
 
 ## Server-owner behavior
 
-Normal searches and terrain preparation are bounded and may continue across server ticks. `/home`, `/spawn`, disconnect, and respawn cancellation share one scheduler and release retained chunk tickets through the same cleanup accounting. A stale request cannot move a player after their world, root vehicle, passenger tree, or relevant destination state changes.
+Normal searches and terrain preparation are bounded and may continue across server ticks. `/home`, `/spawn`, disconnect, and respawn cancellation share one scheduler and release retained chunk tickets through the same cleanup accounting. A stale request cannot move a player after their world, root vehicle, passenger tree, or relevant destination state changes; the player is told with `teleportCancelledMessage`. A player on foot changing pose (sneaking, swimming) does not make a request stale.
 
 Non-End spawn search retains at most 64 search chunks. An accepted spawn or immediate destination prepares the fixed five-by-five destination area, at most 25 chunks, before movement. Home preparation loads only the chunks required by Minecraft's saved-respawn reads and OMWH's exact safety footprint.
 

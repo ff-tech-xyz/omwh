@@ -128,26 +128,36 @@ public final class HomeDestination {
 
             @Override
             public OmwhCommands.PendingStep<Void> step(int candidateBudget, int worldWorkBudget) {
+                // Keep going through terrain reads whose chunks are already loaded. Before, this
+                // stopped after every single read, so /home spent ~25 server ticks doing nothing.
+                // It still stops for the tick as soon as it has to load a chunk.
                 int candidatesStarted = 0;
-                if (active == null) {
-                    if (!candidates.hasNext()) return OmwhCommands.PendingStep.complete(null, 0, 0);
-                    if (candidateBudget <= 0 || worldWorkBudget <= 0) {
-                        return OmwhCommands.PendingStep.pending(0, 0);
+                int prepared = 0;
+                while (true) {
+                    if (active == null) {
+                        if (!candidates.hasNext()) {
+                            return OmwhCommands.PendingStep.complete(null, candidatesStarted, prepared);
+                        }
+                        if (candidatesStarted >= candidateBudget || worldWorkBudget - prepared <= 0) {
+                            return OmwhCommands.PendingStep.pending(candidatesStarted, prepared);
+                        }
+                        active = candidates.next();
+                        preparation.requireTerrainRead(active);
+                        candidatesStarted++;
                     }
-                    active = candidates.next();
-                    preparation.requireTerrainRead(active);
-                    candidatesStarted = 1;
+                    int loaded = preparation.prepare(
+                            SpawnDestination.PREPARATION_CHUNKS_PER_VISIT, worldWorkBudget - prepared);
+                    prepared += loaded;
+                    if (!preparation.terrainReadReady(active)) {
+                        return OmwhCommands.PendingStep.pending(candidatesStarted, prepared);
+                    }
+                    active = null;
+                    if (loaded > 0) {
+                        return candidates.hasNext()
+                                ? OmwhCommands.PendingStep.pending(candidatesStarted, prepared)
+                                : OmwhCommands.PendingStep.complete(null, candidatesStarted, prepared);
+                    }
                 }
-                int prepared = preparation.prepare(
-                        SpawnDestination.PREPARATION_CHUNKS_PER_VISIT, worldWorkBudget);
-                if (!preparation.terrainReadReady(active)) {
-                    return OmwhCommands.PendingStep.pending(candidatesStarted, prepared);
-                }
-                active = null;
-                if (candidates.hasNext()) {
-                    return OmwhCommands.PendingStep.pending(candidatesStarted, prepared);
-                }
-                return OmwhCommands.PendingStep.complete(null, candidatesStarted, prepared);
             }
 
             @Override public int closeWork() { return preparation.closeWork(); }

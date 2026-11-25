@@ -221,6 +221,7 @@ public final class OmwhCommands {
             int worldWorkUsed = retryCleanup(allowance, tickWorkLimit);
             int itemsCompleted = 0;
             Set<K> visited = new HashSet<>();
+            int queuedAtStart = roundRobin.size();
             while (!roundRobin.isEmpty() && candidatesUsed < candidateBudget && worldWorkUsed < tickWorkLimit) {
                 K key = roundRobin.removeFirst();
                 if (!visited.add(key)) {
@@ -235,7 +236,11 @@ public final class OmwhCommands {
                     roundRobin.addFirst(key);
                     break;
                 }
-                int candidateSlice = Math.min(1, candidateBudget - candidatesUsed);
+                // Split the candidate budget fairly between everyone still waiting this tick.
+                // (This used to be Math.min(1, ...), which let a search check only ONE spot per
+                // server tick: about 20 spots a second, so a hard spawn search could take hours.)
+                int waiting = Math.max(1, queuedAtStart - visited.size() + 1);
+                int candidateSlice = Math.max(1, (candidateBudget - candidatesUsed) / waiting);
                 int worldSlice = Math.min(MAX_PENDING_VISIT_WORK - cleanupReserve, availableWorldWork);
                 PendingStep<V> step = work.step(candidateSlice, worldSlice);
                 if (step.candidatesUsed < 0 || step.candidatesUsed > candidateSlice
@@ -415,6 +420,14 @@ public final class OmwhCommands {
                 new MessageValues(command, null, null, null, false));
     }
 
+    /** A waiting teleport was dropped: always tell the player why instead of failing silently. */
+    static String lifecycleRejectionMessage(OmwhConfig config, TeleportService.LifecycleStatus status,
+                                            String command) {
+        String template = status == TeleportService.LifecycleStatus.TOO_LARGE
+                ? config.passengerTreeTooLargeMessage : config.teleportCancelledMessage;
+        return renderMessage(config, template, new MessageValues(command, null, null, null, false));
+    }
+
     static boolean continuesTeleportCompletion(TeleportService.Result result) {
         return result.success() || result.partial();
     }
@@ -448,12 +461,7 @@ public final class OmwhCommands {
                         return current;
                     },
                     result -> completeHome(player, result),
-                    status -> {
-                        if (status == TeleportService.LifecycleStatus.TOO_LARGE) {
-                            sendSafely(player,
-                                    commandMessage(config.passengerTreeTooLargeMessage, config.homeCommand));
-                        }
-                    });
+                    status -> sendSafely(player, lifecycleRejectionMessage(config, status, config.homeCommand)));
             PendingWork<Void> guarded = guardPending(coordinated, failure -> {
                 LOGGER.error("Unexpected pending /home failure for {}", player.getGameProfile().name(), failure);
                 sendSafely(player, commandMessage(config.internalErrorMessage, config.homeCommand));
@@ -528,12 +536,7 @@ public final class OmwhCommands {
                         return current;
                     },
                     result -> completeSpawn(player, result),
-                    status -> {
-                        if (status == TeleportService.LifecycleStatus.TOO_LARGE) {
-                            sendSafely(player,
-                                    commandMessage(config.passengerTreeTooLargeMessage, config.spawnCommand));
-                        }
-                    });
+                    status -> sendSafely(player, lifecycleRejectionMessage(config, status, config.spawnCommand)));
             PendingWork<Void> guarded = guardPending(coordinated, failure -> {
                 LOGGER.error("Unexpected pending /spawn failure for {}", player.getGameProfile().name(), failure);
                 sendSafely(player, commandMessage(config.internalErrorMessage, config.spawnCommand));

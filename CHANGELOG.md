@@ -6,6 +6,15 @@
 
 - Updated OMWH for Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0, and Java 25.
 - `/home` now recognizes Minecraft 26.3's straw beds and applies the same saved-home terrain preparation and safety rules used for other beds.
+- `/spawn` safety searches now check the closest spots first: nearby columns before far ones, and heights 0, +1, -1, +2, -2 and so on, up to 16 blocks up or down. The search still reaches 48 blocks sideways.
+- Slabs, stairs, dirt paths, farmland, soul sand, mud and similar blocks now count as ground for `/spawn`, and carpets or thin snow at foot level no longer block a spot. Fences and walls still do. Campfires, soul campfires and pointed dripstone are now hazards.
+- Added `teleportCancelledMessage`. A waiting `/home` or `/spawn` that is dropped because the player or their ride changed now says so instead of doing nothing.
+
+### Fixed
+
+- `/spawn` and `/home` no longer take a very long time. A waiting search could check only one spot per server tick (about 20 a second); it now shares the full per-tick budget between waiting players. Chunk loading is still limited to two chunks per search per tick.
+- `/home` no longer waits a server tick for every terrain read whose chunks are already loaded.
+- Sneaking, swimming or crawling while a teleport waited no longer cancels it silently.
 
 ## [1.2.0] - 2026-08-24
 

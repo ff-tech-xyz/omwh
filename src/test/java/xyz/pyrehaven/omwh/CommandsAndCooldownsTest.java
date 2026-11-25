@@ -36,6 +36,7 @@ public final class CommandsAndCooldownsTest {
         pendingHomeRespawnAuthorityChangesCancelBeforeResolutionAndReleaseExactly();
         pendingGenerationFailureRetiresAndReleasesExactlyOnce();
         pendingSpawnSchedulingSharesOneFairServerWideBudget();
+        aLoneSearchGetsTheWholeCandidateBudget();
         preparationProgressYieldsAfterOneQuantumPerSchedulerTick();
         productionPendingSchedulerSlicesRevalidationAndRetiresStaleWork();
         commandsTickPassesASeparatePendingAdvancementSlice();
@@ -44,7 +45,7 @@ public final class CommandsAndCooldownsTest {
         admissionAndLifecycleWorkShareHardAggregateAllowances();
         zeroProgressKeepsTheBlockedRequestNext();
         pendingCommandAdmissionCancelsOnlyCompetingTeleports();
-        System.out.println("CommandsAndCooldownsTest PASS (23 behavior groups)");
+        System.out.println("CommandsAndCooldownsTest PASS (24 behavior groups)");
     }
 
     private static void forceSyntaxFollowsTheServerSetting() {
@@ -590,10 +591,13 @@ public final class CommandsAndCooldownsTest {
         commands.tick();
         check(retained.size() == 1 && releases.get() == 0 && completions.isEmpty(),
                 "terrain tickets transfer to the pending OmwhCommands owner between ticks");
-        commands.tick();
-        check(retained.size() == 1 && releases.get() == 0 && completions.isEmpty(),
-                "terrain tickets remain owned while the prepared search is still pending");
-        commands.tick();
+        int ticks = 1;
+        while (completions.isEmpty()) {
+            check(retained.size() == 1 && releases.get() == 0,
+                    "terrain tickets remain owned while the prepared search is still pending");
+            commands.tick();
+            check(++ticks <= 3, "an unsafe one-spot search finishes within a few ticks");
+        }
         check(retained.isEmpty() && releases.get() == 1
                         && completions.size() == 1
                         && completions.getFirst().outcome() == SpawnDestination.Outcome.UNSAFE,
@@ -836,6 +840,41 @@ public final class CommandsAndCooldownsTest {
         int advanced = 0;
         for (int player = 0; player < players; player++) if (progress[player] > before[player]) advanced++;
         check(advanced == 50, "round-robin advances distinct players before returning to the front");
+    }
+
+    private static void aLoneSearchGetsTheWholeCandidateBudget() {
+        OmwhCommands.PendingSearches<String, Void> pending = new OmwhCommands.PendingSearches<>();
+        java.util.concurrent.atomic.AtomicInteger offered = new java.util.concurrent.atomic.AtomicInteger();
+        check(pending.add("alone", (candidateBudget, worldBudget) -> {
+            offered.set(candidateBudget);
+            return OmwhCommands.PendingStep.pending(candidateBudget, 1);
+        }), "lone search added");
+        OmwhCommands.PendingTick used = pending.tick(OmwhCommands.SEARCH_CANDIDATES_PER_TICK,
+                OmwhCommands.SEARCH_WORLD_WORK_PER_TICK, ignored -> { });
+        check(offered.get() == OmwhCommands.SEARCH_CANDIDATES_PER_TICK
+                        && used.candidatesUsed() == OmwhCommands.SEARCH_CANDIDATES_PER_TICK,
+                "one waiting player may check thousands of spots per tick, not just one");
+
+        OmwhCommands.PendingSearches<Integer, Void> shared = new OmwhCommands.PendingSearches<>();
+        int[] offers = new int[4];
+        for (int player = 0; player < 4; player++) {
+            int id = player;
+            shared.add(id, (candidateBudget, worldBudget) -> {
+                offers[id] = candidateBudget;
+                return OmwhCommands.PendingStep.pending(candidateBudget, 1);
+            });
+        }
+        shared.tick(400, OmwhCommands.SEARCH_WORLD_WORK_PER_TICK, ignored -> { });
+        check(offers[0] == 100 && offers[1] == 100 && offers[2] == 100 && offers[3] == 100,
+                "waiting players split the candidate budget evenly");
+
+        OmwhConfig config = new OmwhConfig();
+        check(OmwhCommands.lifecycleRejectionMessage(config, TeleportService.LifecycleStatus.STALE, "spawn")
+                        .contains("/spawn was cancelled"),
+                "a dropped teleport tells the player instead of failing silently");
+        check(OmwhCommands.lifecycleRejectionMessage(config, TeleportService.LifecycleStatus.TOO_LARGE, "home")
+                        .equals(config.passengerTreeTooLargeMessage),
+                "an oversized group keeps its own message");
     }
 
     private static void preparationProgressYieldsAfterOneQuantumPerSchedulerTick() {

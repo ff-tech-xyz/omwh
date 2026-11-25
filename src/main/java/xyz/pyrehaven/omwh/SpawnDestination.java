@@ -25,6 +25,10 @@ import java.util.function.Supplier;
 public final class SpawnDestination {
     private static final Logger LOGGER = LoggerFactory.getLogger("omwh");
     static final int SEARCH_BOUND = 48;
+    // How far up and down each column is checked. The old 1.2.0 search checked 48 blocks up and
+    // down, which made the search space ~900,000 spots and mostly found caves or open air.
+    static final int SEARCH_DOWN = 16;
+    static final int SEARCH_UP = 16;
     static final int PREPARATION_CHUNKS_PER_VISIT = 2;
 
     static final int PENDING_START_WORK = 1;
@@ -81,7 +85,9 @@ public final class SpawnDestination {
         public ProbeStep step(int availableWorldWork) {
             int prepared = preparation.prepare(PREPARATION_CHUNKS_PER_VISIT, availableWorldWork);
             int width = kind == ProbeKind.ROOT ? rootWidth : 1;
-            if (!preparation.candidateReady(center, active, width)) {
+            // Loading chunks is the slow part, so stop for this tick once any were loaded. This keeps
+            // a fast search from loading dozens of chunks in one tick and lagging the server.
+            if (prepared > 0 || !preparation.candidateReady(center, active, width)) {
                 return new ProbeStep(ProbeOutcome.INCOMPLETE, prepared);
             }
             if (!delegateStarted) {
@@ -405,6 +411,91 @@ public final class SpawnDestination {
         return () -> new OffsetIterator(bound);
     }
 
+    /**
+     * Nearest-first search: columns are visited closest to the spawn first (by real distance), and
+     * inside each column heights are tried 0, +1, -1, +2, -2, ... within [-down, +up].
+     */
+    static Iterable<Offset> nearestOffsets(int horizontalBound, int down, int up) {
+        if (horizontalBound < 0 || down < 0 || up < 0) throw new IllegalArgumentException("invalid search bound");
+        int[] columns = HorizontalOrder.columns(horizontalBound);
+        return () -> new NearestOffsetIterator(columns, down, up);
+    }
+
+    static int nearestOffsetCount(int horizontalBound, int down, int up) {
+        int side = 2 * horizontalBound + 1;
+        return side * side * (down + up + 1);
+    }
+
+    /** Shared, read-only column order so each search does not build its own list. */
+    private static final class HorizontalOrder {
+        private static final int[] PRODUCTION = build(SEARCH_BOUND);
+
+        static int[] columns(int bound) {
+            return bound == SEARCH_BOUND ? PRODUCTION : build(bound);
+        }
+
+        private static int[] build(int bound) {
+            int side = 2 * bound + 1;
+            Integer[] order = new Integer[side * side];
+            for (int index = 0; index < order.length; index++) order[index] = index;
+            java.util.Arrays.sort(order, (left, right) -> {
+                int lx = left / side - bound, lz = left % side - bound;
+                int rx = right / side - bound, rz = right % side - bound;
+                int byDistance = Integer.compare(lx * lx + lz * lz, rx * rx + rz * rz);
+                if (byDistance != 0) return byDistance;
+                int byX = Integer.compare(lx, rx);
+                return byX != 0 ? byX : Integer.compare(lz, rz);
+            });
+            int[] packed = new int[order.length * 2];
+            for (int index = 0; index < order.length; index++) {
+                packed[2 * index] = order[index] / side - bound;
+                packed[2 * index + 1] = order[index] % side - bound;
+            }
+            return packed;
+        }
+    }
+
+    private static final class NearestOffsetIterator implements Iterator<Offset> {
+        private final int[] columns;
+        private final int down;
+        private final int up;
+        private int column;
+        private int step;
+
+        private NearestOffsetIterator(int[] columns, int down, int up) {
+            this.columns = columns;
+            this.down = down;
+            this.up = up;
+        }
+
+        @Override public boolean hasNext() { return 2 * column < columns.length; }
+
+        @Override
+        public Offset next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            Offset result = new Offset(columns[2 * column], dy(step), columns[2 * column + 1]);
+            advance();
+            return result;
+        }
+
+        private void advance() {
+            int last = 2 * Math.max(down, up);
+            do {
+                step++;
+                if (step > last) {
+                    step = 0;
+                    column++;
+                    return;
+                }
+            } while (dy(step) > up || -dy(step) > down);
+        }
+
+        // 0, +1, -1, +2, -2, ...
+        private static int dy(int step) {
+            return step % 2 == 1 ? (step + 1) / 2 : -(step / 2);
+        }
+    }
+
     static int searchRootWidth(int rootWidth, int rootHeight) {
         return DestinationSafety.rootGeometrySupported(rootWidth, rootHeight) ? rootWidth : 1;
     }
@@ -491,7 +582,8 @@ public final class SpawnDestination {
         BlockPos center = anchor;
         DestinationSafety.ChunkPreparation preparation =
                 DestinationSafety.ChunkPreparation.expandableForLevel(level);
-        SearchStage search = new PreparedSearchStage(offsets(SEARCH_BOUND).iterator(), root != player,
+        SearchStage search = new PreparedSearchStage(
+                nearestOffsets(SEARCH_BOUND, SEARCH_DOWN, SEARCH_UP).iterator(), root != player,
                 preparation, residency -> DestinationSafety.SpawnProbe.forLevel(
                 level, center, rootWidth, rootHeight, rootGeometrySupported, residency),
                 center, residencyWidth);

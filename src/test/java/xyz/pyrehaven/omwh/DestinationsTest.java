@@ -43,6 +43,8 @@ public final class DestinationsTest {
         immediateWorkBoundsAreDerivedFromEnforcedGeometry();
         spawnSearchIsLazyDeterministicAndComplete();
         zeroBoundsEmitOnlyTheOrigin();
+        nearestSearchVisitsCloseColumnsFirstAndStaysBounded();
+        groundAndThinFloorRulesAcceptCommonBuildBlocks();
         incrementalSearchResumesWithinFixedTickBudgets();
         safeOriginLazilyPreparesOnlyItsCandidateTerrain();
         laterCandidateLoadsOnlyItsNewBoundaryChunkWithoutRestart();
@@ -62,7 +64,7 @@ public final class DestinationsTest {
         spawnFailureDistinguishesOversizedVehicle();
         collisionOwnersIncludeShellAndEveryInvolvedChunk();
         safetyOwnsFootprintsHazardsAndFiveByFiveChunkPreparation();
-        System.out.println("DestinationsTest PASS (34 behavior groups)");
+        System.out.println("DestinationsTest PASS (36 behavior groups)");
     }
 
     private static void homePolicyAllowsOnlyAcceptedRespawnsAndOneBedAlternate() {
@@ -452,6 +454,50 @@ public final class DestinationsTest {
         check(count == 912_673L, "complete bounded production space");
         check(elapsedNanos < 10_000_000_000L, "lazy production traversal completes promptly");
         System.out.printf("Spawn offset traversal count=%d elapsedMs=%.3f%n", count, elapsedNanos / 1_000_000.0);
+    }
+
+    private static void nearestSearchVisitsCloseColumnsFirstAndStaysBounded() {
+        List<SpawnDestination.Offset> tiny = toList(SpawnDestination.nearestOffsets(1, 1, 2));
+        check(tiny.size() == SpawnDestination.nearestOffsetCount(1, 1, 2) && tiny.size() == 36,
+                "nearest search covers every column and height exactly once");
+        check(tiny.subList(0, 4).equals(List.of(new SpawnDestination.Offset(0, 0, 0),
+                        new SpawnDestination.Offset(0, 1, 0), new SpawnDestination.Offset(0, -1, 0),
+                        new SpawnDestination.Offset(0, 2, 0))),
+                "the spawn column is tried first: same height, then one up, one down, two up");
+        check(tiny.get(4).equals(new SpawnDestination.Offset(-1, 0, 0)),
+                "a side neighbour is tried before a diagonal neighbour");
+        check(new java.util.HashSet<>(tiny).size() == tiny.size(), "no spot is checked twice");
+
+        long count = 0;
+        long previousDistance = 0;
+        for (SpawnDestination.Offset offset : SpawnDestination.nearestOffsets(
+                SpawnDestination.SEARCH_BOUND, SpawnDestination.SEARCH_DOWN, SpawnDestination.SEARCH_UP)) {
+            long distance = (long) offset.x() * offset.x() + (long) offset.z() * offset.z();
+            check(distance >= previousDistance, "columns never get closer again");
+            check(offset.y() >= -SpawnDestination.SEARCH_DOWN && offset.y() <= SpawnDestination.SEARCH_UP,
+                    "heights stay inside the column range");
+            previousDistance = distance;
+            count++;
+        }
+        check(count == SpawnDestination.nearestOffsetCount(
+                        SpawnDestination.SEARCH_BOUND, SpawnDestination.SEARCH_DOWN, SpawnDestination.SEARCH_UP)
+                        && count == 97L * 97L * 33L,
+                "production search is about a third of the old 912,673 spots");
+    }
+
+    private static void groundAndThinFloorRulesAcceptCommonBuildBlocks() {
+        check(DestinationSafety.standableTop(false, 1.0), "full blocks are ground");
+        check(DestinationSafety.standableTop(false, 0.5), "bottom slabs are ground");
+        check(DestinationSafety.standableTop(false, 15.0 / 16.0), "dirt paths and farmland are ground");
+        check(!DestinationSafety.standableTop(false, 1.0 / 16.0), "a carpet alone is not ground");
+        check(!DestinationSafety.standableTop(true, 0.0), "air is not ground");
+        check(!DestinationSafety.standableTop(false, 1.5), "fences are not ground");
+        check(DestinationSafety.thinFloor(0.0, 1.0 / 16.0), "carpet at foot level does not block");
+        check(DestinationSafety.thinFloor(0.0, 2.0 / 16.0), "two snow layers do not block");
+        check(!DestinationSafety.thinFloor(0.0, 0.5), "a slab at foot level still blocks");
+        check(!DestinationSafety.thinFloor(0.5, 0.5625), "only shapes resting on the floor count");
+        check(DestinationSafety.isHazard(Blocks.CAMPFIRE) && DestinationSafety.isHazard(Blocks.POINTED_DRIPSTONE),
+                "campfires and dripstone are hazards");
     }
 
     private static void zeroBoundsEmitOnlyTheOrigin() {
