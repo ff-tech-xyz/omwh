@@ -4,18 +4,24 @@ OMWH is a small server-side Fabric mod. Production behavior stays in one Java pa
 
 ```text
 omwh/
-├── .github/workflows/ci.yml
-├── .gitignore
-├── ARCHITECTURE.md
-├── BEHAVIOR.md
-├── CHANGELOG.md
-├── CONFIGURATION.md
-├── LICENSE
-├── README.md
-├── build.gradle
-├── gradle.properties
-├── gradlew
-├── settings.gradle
+├── .github/workflows/ci.yml         # Canonical CI build and regression gate
+├── .gitignore                       # Generated and local-file exclusions
+├── ARCHITECTURE.md                  # Contributor map and ownership notes
+├── BEHAVIOR.md                      # Player and server-owner contract
+├── CHANGELOG.md                     # Versioned player-facing changes
+├── CONFIGURATION.md                 # Persisted configuration contract
+├── LICENSE                          # CC0-1.0 legal text
+├── README.md                        # Installation and command overview
+├── MODRINTH.md                      # Published description with full-size gallery images
+├── docs/images/                     # Submitted screenshots, resized without color edits
+│   ├── saved-home.jpg               # Bed destination
+│   ├── mounted-home-command.jpg     # Mounted /home command
+│   ├── join-cooldown.jpg            # Join cooldown feedback
+│   └── mounted-arrival.jpg          # Boat and passengers at home
+├── build.gradle                     # Build plus canonical JavaExec regression tasks
+├── gradle.properties                # Project and dependency versions
+├── gradlew                          # Reproducible Unix Gradle launcher
+├── settings.gradle                  # Gradle project identity
 ├── gradle/
 │   └── wrapper/
 │       ├── gradle-wrapper.jar
