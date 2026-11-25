@@ -55,11 +55,11 @@ See the [configuration guide](https://github.com/ff-tech-xyz/omwh/blob/main/CONF
 
 ## Installation
 
-For **OMWH 1.2.1**, you need:
+For **OMWH 1.2.1.1**, you need:
 
 - Minecraft 26.3
 - Fabric Loader 0.19.5 or newer
-- Fabric API for Minecraft 26.3 (the 1.2.1 release uses 0.161.0)
+- Fabric API for Minecraft 26.3 (OMWH 1.2.1.1 uses 0.161.0)
 - Java 25 or newer
 
 Download OMWH from [Modrinth](https://modrinth.com/mod/omwh).

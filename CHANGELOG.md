@@ -1,6 +1,22 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.1.1] - 2026-11-25
+
+OMWH 1.2.1.1 makes `/spawn` and `/home` safety checks fast again and stops them from failing quietly.
+
+### Changed
+
+- `/spawn` safety searches now check the closest spots first: nearby columns before far ones, and heights 0, +1, -1, +2, -2 and so on, up to 16 blocks up or down. The search still reaches 48 blocks sideways.
+- Slabs, stairs, dirt paths, farmland, soul sand, mud and similar blocks now count as ground for `/spawn`, and carpets or thin snow at foot level no longer block a spot. Fences and walls still do. Campfires, soul campfires and pointed dripstone are now hazards.
+- Added `teleportCancelledMessage`. A waiting `/home` or `/spawn` that is dropped because the player or their ride changed now says so instead of doing nothing.
+
+### Fixed
+
+- `/spawn` and `/home` no longer take a very long time. A waiting search could check only one spot per server tick (about 20 a second); it now shares the full per-tick budget between waiting players. Chunk loading is still limited to two chunks per search per tick.
+- `/home` no longer waits a server tick for every terrain read whose chunks are already loaded.
+- Sneaking, swimming or crawling while a teleport waited no longer cancels it silently.
+
+## [1.2.1] - 2026-09-19
 
 ### Changed
 
@@ -79,7 +95,8 @@ OMWH 1.2.0 expands dimension support, gives players an optional safety override,
 - Added `/home` and `/spawn` with PvP, damage, join, and regular cooldowns.
 - Added teleport support for vehicles and mounts.
 
-[Unreleased]: https://github.com/ff-tech-xyz/omwh/compare/v1.2.0...HEAD
+[1.2.1.1]: https://github.com/ff-tech-xyz/omwh/compare/v1.2.1...v1.2.1.1
+[1.2.1]: https://github.com/ff-tech-xyz/omwh/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/ff-tech-xyz/omwh/compare/v1.1.3...v1.2.0
 [1.1.3]: https://github.com/ff-tech-xyz/omwh/compare/v1.1.0...v1.1.3
 [1.1.0]: https://github.com/ff-tech-xyz/omwh/releases/tag/v1.1.0

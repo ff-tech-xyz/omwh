@@ -110,7 +110,7 @@ public final class TeleportService {
     static LifecycleFence<Entity> captureLifecycle(ServerPlayer player) {
         Entity root = player.getRootVehicle();
         return captureLifecycle(player, root, player.level(), root != player,
-                root.getBbWidth(), root.getBbHeight(), ENTITY_TREE);
+                fenceWidth(player, root), fenceHeight(player, root), ENTITY_TREE);
     }
 
 
@@ -124,7 +124,19 @@ public final class TeleportService {
         ServerPlayer player = (ServerPlayer) fence.player();
         Entity root = player.getRootVehicle();
         return lifecycleStatus(fence, player, root, player.level(), root != player,
-                root.getBbWidth(), root.getBbHeight(), !player.hasDisconnected(), player.isAlive(), ENTITY_TREE);
+                fenceWidth(player, root), fenceHeight(player, root),
+                !player.hasDisconnected(), player.isAlive(), ENTITY_TREE);
+    }
+
+    // A player on foot is always checked as a standing 1x2 player, so their live hitbox does not
+    // matter. Before, sneaking, swimming or crawling while a search waited changed the hitbox and
+    // silently cancelled the teleport. Only a vehicle's real size matters.
+    private static double fenceWidth(Entity player, Entity root) {
+        return root == player ? 0.0 : root.getBbWidth();
+    }
+
+    private static double fenceHeight(Entity player, Entity root) {
+        return root == player ? 0.0 : root.getBbHeight();
     }
 
     static <T> LifecycleFence<T> captureLifecycle(T player, T root, Object sourceLevel,

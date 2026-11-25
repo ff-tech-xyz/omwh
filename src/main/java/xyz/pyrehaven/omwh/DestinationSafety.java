@@ -1,6 +1,7 @@
 package xyz.pyrehaven.omwh;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -19,6 +20,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -397,13 +399,22 @@ public final class DestinationSafety {
                     return chunk.getBlockState(position);
                 }
                 @Override public boolean fullSupport(BlockState state, BlockPos position) {
-                    return state.isCollisionShapeFullBlock(level, position);
+                    if (state.isCollisionShapeFullBlock(level, position)) return true;
+                    VoxelShape shape = state.getCollisionShape(level, position, CollisionContext.empty());
+                    if (shape.isEmpty()) return false;
+                    boolean wide = shape.min(Direction.Axis.X) <= 0.0625 && shape.max(Direction.Axis.X) >= 0.9375
+                            && shape.min(Direction.Axis.Z) <= 0.0625 && shape.max(Direction.Axis.Z) >= 0.9375;
+                    return wide && standableTop(false, shape.max(Direction.Axis.Y));
                 }
                 @Override public boolean collides(BlockState state, BlockPos position,
                                                   double minX, double minY, double minZ,
                                                   double maxX, double maxY, double maxZ) {
+                    VoxelShape shape = state.getCollisionShape(level, position, CollisionContext.empty());
+                    if (shape.isEmpty()) return false;
+                    if (position.getY() == floor(minY)
+                            && thinFloor(shape.min(Direction.Axis.Y), shape.max(Direction.Axis.Y))) return false;
                     return Shapes.joinIsNotEmpty(
-                            state.getCollisionShape(level, position, CollisionContext.empty()),
+                            shape,
                             Shapes.box(minX - position.getX(), minY - position.getY(), minZ - position.getZ(),
                                     maxX - position.getX(), maxY - position.getY(), maxZ - position.getZ()),
                             BooleanOp.AND);
@@ -599,11 +610,32 @@ public final class DestinationSafety {
     }
 
 
+    /** Highest point of a thin floor (carpet, low snow) that a player can simply stand on top of. */
+    static final double THIN_FLOOR_HEIGHT = 0.125;
+    /** Lowest top surface that still counts as ground (bottom slabs, paths, farmland, soul sand). */
+    static final double MIN_STANDABLE_TOP = 0.5;
+
+    /**
+     * Ground does not have to be a full cube. Slabs, dirt paths, farmland, soul sand, mud and similar
+     * blocks are fine to stand on. The old rule only accepted full cubes, so a spawn on a path or a
+     * slab floor was wrongly called unsafe. Anything taller than a block (fences, walls) is still
+     * rejected by the collision check.
+     */
+    static boolean standableTop(boolean empty, double topY) {
+        return !empty && topY >= MIN_STANDABLE_TOP && topY <= 1.0;
+    }
+
+    /** Carpets and one or two snow layers at foot level do not block a teleport. */
+    static boolean thinFloor(double bottomY, double topY) {
+        return bottomY <= 0.0 && topY <= THIN_FLOOR_HEIGHT;
+    }
+
     static boolean isHazard(Block block) {
         return block == Blocks.FIRE || block == Blocks.SOUL_FIRE || block == Blocks.LAVA
                 || block == Blocks.MAGMA_BLOCK || block == Blocks.CACTUS
                 || block == Blocks.SWEET_BERRY_BUSH || block == Blocks.WITHER_ROSE
-                || block == Blocks.POWDER_SNOW;
+                || block == Blocks.POWDER_SNOW || block == Blocks.CAMPFIRE
+                || block == Blocks.SOUL_CAMPFIRE || block == Blocks.POINTED_DRIPSTONE;
     }
 
     static boolean isUnsafeCell(boolean hasFluid, Block block) {

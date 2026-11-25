@@ -59,6 +59,7 @@ public final class OmwhConfig {
     public String passengerTreeTooLargeMessage = "§cYour passenger group is too large for OMWH to teleport safely.";
     public String currentWorldUnavailableMessage = "§cCannot determine your current world.";
     public String worldSpawnUnavailableMessage = "§cCannot determine world spawn.";
+    public String teleportCancelledMessage = "§eYour /{command} was cancelled because you or your ride changed. Please try again.";
     public String passengerNotificationMessage = "§e{player} teleported you with their vehicle to {destination}.";
     public String homePassengerDestination = "their home";
     public String spawnPassengerDestination = "spawn";
@@ -185,6 +186,7 @@ public final class OmwhConfig {
         requireMessage(spawnPendingMessage, "spawnPendingMessage");
         requireMessage(spawnAnchorChangedMessage, "spawnAnchorChangedMessage");
         requireMessage(busyMessage, "busyMessage");
+        requireMessage(teleportCancelledMessage, "teleportCancelledMessage");
         requireMessage(passengerTreeTooLargeMessage, "passengerTreeTooLargeMessage");
         requireMessage(currentWorldUnavailableMessage, "currentWorldUnavailableMessage");
         requireMessage(worldSpawnUnavailableMessage, "worldSpawnUnavailableMessage");

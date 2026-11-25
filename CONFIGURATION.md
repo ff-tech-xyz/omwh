@@ -86,6 +86,7 @@ All message and destination-label fields are JSON strings. Both `&` and `§` Min
 | `spawnAnchorChangedMessage` | `§cWorld spawn changed while OMWH was checking safety. Please try /{command} again.` | `{command}` |
 | `busyMessage` | `§cOMWH is busy right now. Please try /{command} again.` | `{command}` |
 | `passengerTreeTooLargeMessage` | `§cYour passenger group is too large for OMWH to teleport safely.` | `{command}` |
+| `teleportCancelledMessage` | `§eYour /{command} was cancelled because you or your ride changed. Please try again.` | `{command}` |
 | `currentWorldUnavailableMessage` | `§cCannot determine your current world.` | `{command}` |
 | `worldSpawnUnavailableMessage` | `§cCannot determine world spawn.` | `{command}` |
 | `passengerNotificationMessage` | `§e{player} teleported you with their vehicle to {destination}.` | `{command}`, `{player}`, `{destination}` |
