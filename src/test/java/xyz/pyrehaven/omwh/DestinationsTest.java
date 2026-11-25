@@ -134,10 +134,10 @@ public final class DestinationsTest {
                 new BlockPos(14, 70, 8), anchor, false, 0.0f, standing);
         check(interiorReads.size() == HomeDestination.ANCHOR_DISMOUNT_CANDIDATES
                         && edgeReads.size() == HomeDestination.ANCHOR_DISMOUNT_CANDIDATES,
-                "mapped 26.2 anchor resolution retains all 25 vanilla dismount candidates");
+                "mapped 26.3 anchor resolution retains all 25 vanilla dismount candidates");
 
         var northBed = Blocks.BED.red().defaultBlockState().setValue(
-                net.minecraft.world.level.block.BedBlock.FACING, net.minecraft.core.Direction.NORTH);
+                net.minecraft.world.level.block.AbstractBedBlock.FACING, net.minecraft.core.Direction.NORTH);
         check(HomeDestination.vanillaResolutionTerrain(
                         BlockPos.ZERO, northBed, false, 0.0f, standing).size()
                         == HomeDestination.ORDINARY_BED_DISMOUNT_CANDIDATES,
@@ -146,6 +146,12 @@ public final class DestinationsTest {
                         BlockPos.ZERO, northBed, true, 0.0f, standing).size()
                         == HomeDestination.BUNK_BED_DISMOUNT_CANDIDATES,
                 "bunk bed uses exact upper, lower, and above candidate groups");
+        var northStrawBed = Blocks.STRAW_BED.defaultBlockState().setValue(
+                net.minecraft.world.level.block.AbstractBedBlock.FACING, net.minecraft.core.Direction.NORTH);
+        check(HomeDestination.vanillaResolutionTerrain(
+                        BlockPos.ZERO, northStrawBed, false, 0.0f, standing).size()
+                        == HomeDestination.ORDINARY_BED_DISMOUNT_CANDIDATES,
+                "26.3 straw beds use the shared vanilla bed resolution path");
 
         List<Long> generated = new ArrayList<>();
         DestinationSafety.ChunkPreparation preparation =

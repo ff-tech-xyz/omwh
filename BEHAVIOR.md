@@ -30,7 +30,7 @@ Normal searches and terrain preparation are bounded and may continue across serv
 
 Non-End spawn search retains at most 64 search chunks. An accepted spawn or immediate destination prepares the fixed five-by-five destination area, at most 25 chunks, before movement. Home preparation loads only the chunks required by Minecraft's saved-respawn reads and OMWH's exact safety footprint.
 
-The saved-respawn terrain plan and End-arrival behavior are coupled to Minecraft 26.2. Contributors updating Minecraft must compare the mapped vanilla resolution paths before changing those constants or traversal rules.
+The saved-respawn terrain plan and End-arrival behavior are coupled to Minecraft 26.3. Contributors updating Minecraft must compare the mapped vanilla resolution paths before changing those constants or traversal rules.
 
 ## Messages
 

@@ -504,7 +504,7 @@ public final class SpawnDestination {
     }
 
     private static Result findEnd(ServerPlayer player, ServerLevel endLevel, boolean force) {
-        // Minecraft 26.2 coupling: getPortalDestination mutates/regenerates the obsidian platform
+        // Minecraft 26.3 coupling: getPortalDestination mutates/regenerates the obsidian platform
         // and supplies transition flags, orientation, sound, and portal ticket. Keep this one vanilla
         // call as the authority; do not recreate or "sanitize" its TeleportTransition locally.
         Entity root = player.getRootVehicle();

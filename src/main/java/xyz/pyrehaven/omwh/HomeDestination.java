@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.AbstractBedBlock;
 import net.minecraft.world.level.block.RespawnAnchorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.TeleportTransition;
@@ -158,8 +158,8 @@ public final class HomeDestination {
     static List<TerrainRead> vanillaResolutionTerrain(BlockPos homeBlock, BlockState homeState,
                                                        boolean bunkBed, float yaw,
                                                        EntityDimensions standingDimensions) {
-        // Minecraft 26.2 coupling: this mirrors RespawnAnchorBlock.findStandUpPosition and
-        // BedBlock.findStandUpPosition/Player.findRespawnPositionAndUseSpawnBlock read order.
+        // Minecraft 26.3 coupling: this mirrors RespawnAnchorBlock.findStandUpPosition and
+        // AbstractBedBlock.findStandUpPosition/Player.findRespawnPositionAndUseSpawnBlock read order.
         // Re-derive the candidates and collision-owner shell from mapped vanilla source on update;
         // loading fewer chunks changes a cold-world home from pending to a false denial.
         if (homeState.getBlock() instanceof RespawnAnchorBlock) {
@@ -172,9 +172,9 @@ public final class HomeDestination {
             offsets.add(new int[]{0, 1, 0});
             return terrainForDismountOffsets(homeBlock, offsets, standingDimensions);
         }
-        if (!(homeState.getBlock() instanceof BedBlock)) return List.of();
+        if (!(homeState.getBlock() instanceof AbstractBedBlock)) return List.of();
 
-        Direction facing = homeState.getValue(BedBlock.FACING);
+        Direction facing = homeState.getValue(AbstractBedBlock.FACING);
         Direction side = facing.getClockWise();
         Direction preferred = side.isFacingAngle(yaw) ? side.getOpposite() : side;
         List<int[]> surround = bedSurroundOffsets(facing, preferred);
@@ -355,7 +355,7 @@ public final class HomeDestination {
         BlockPos homeBlock = home.homeBlock();
         DestinationSafety.HomeFit exactFit = DestinationSafety.mountedHomeFit(
                 root, respawn.newLevel(), respawn.position(), homeBlock);
-        boolean bed = respawn.newLevel().getBlockState(homeBlock).getBlock() instanceof BedBlock;
+        boolean bed = respawn.newLevel().getBlockState(homeBlock).getBlock() instanceof AbstractBedBlock;
         boolean covered = bed && isCoveredBed(respawn.newLevel(), homeBlock);
         MountedChoice choice = chooseMounted(exactFit,
                 mayTryAboveBed(true, bed, home.forcedRespawn(), covered), null);
@@ -450,8 +450,8 @@ public final class HomeDestination {
         @Override
         public List<TerrainRead> resolutionTerrain(SavedHome home) {
             BlockState state = home.savedLevel().getBlockState(home.homeBlock());
-            boolean bunkBed = state.getBlock() instanceof BedBlock
-                    && home.savedLevel().getBlockState(home.homeBlock().below()).getBlock() instanceof BedBlock;
+            boolean bunkBed = state.getBlock() instanceof AbstractBedBlock
+                    && home.savedLevel().getBlockState(home.homeBlock().below()).getBlock() instanceof AbstractBedBlock;
             float yaw = home.authority().yaw();
             return vanillaResolutionTerrain(home.homeBlock(), state, bunkBed, yaw,
                     home.player().getDimensions(Pose.STANDING));
@@ -489,7 +489,7 @@ public final class HomeDestination {
 
     private static boolean isCoveredBed(ServerLevel level, BlockPos homeBlock) {
         var homeState = level.getBlockState(homeBlock);
-        BlockPos other = homeBlock.relative(BedBlock.getConnectedDirection(homeState));
+        BlockPos other = homeBlock.relative(AbstractBedBlock.getConnectedDirection(homeState));
         return !level.getBlockState(homeBlock.above()).getCollisionShape(level, homeBlock.above()).isEmpty()
                 || !level.getBlockState(other.above()).getCollisionShape(level, other.above()).isEmpty();
     }
